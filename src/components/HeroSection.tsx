@@ -4,12 +4,14 @@ import { translations } from "../translations";
 import CountdownTimer from "./CountdownTimer";
 import BackgroundSlideshow from "./BackgroundSlideshow";
 import Stardust from "./Stardust";
-import RSVPSummary from "./RSVPSummary";
+import RSVPSummary, { NeedInvite } from "./RSVPSummary";
 import { RSVPFormData } from "../types";
 
 interface HeroSectionProps {
   lang: "en" | "cn";
   myRSVP: RSVPFormData | null;
+  /** False when the visitor has no valid invite code, so there is nothing to reply to. */
+  canRSVP: boolean;
   onAttendClick: () => void;
 }
 
@@ -22,7 +24,7 @@ const FRAME_CORNERS = [
   "bottom-0 right-0 border-b-2 border-r-2 rounded-br-3xl",
 ];
 
-export default function HeroSection({ lang, myRSVP, onAttendClick }: HeroSectionProps) {
+export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: HeroSectionProps) {
   const t = translations[lang].hero;
   const tRsvp = translations[lang].rsvp;
 
@@ -113,6 +115,8 @@ export default function HeroSection({ lang, myRSVP, onAttendClick }: HeroSection
 
           {myRSVP ? (
             <RSVPSummary rsvp={myRSVP} lang={lang} />
+          ) : !canRSVP ? (
+            <NeedInvite lang={lang} />
           ) : (
             <button
               type="button"

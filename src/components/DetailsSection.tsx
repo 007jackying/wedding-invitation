@@ -5,7 +5,7 @@ import { translations } from "../translations";
 import CalendarButton from "./CalendarButton";
 import { onTimelineSnapshot } from "../firebase";
 import { TimelineItem, RSVPFormData } from "../types";
-import RSVPSummary from "./RSVPSummary";
+import RSVPSummary, { NeedInvite } from "./RSVPSummary";
 
 // ponytail: cycled by index rather than matched to each label's meaning — holds up for any timeline length
 const TIMELINE_ICONS = [Users, HeartHandshake, UtensilsCrossed, PartyPopper];
@@ -45,9 +45,11 @@ interface DetailsSectionProps {
   onAttendClick: () => void;
   lang: "en" | "cn";
   myRSVP: RSVPFormData | null;
+  /** False when the visitor has no valid invite code, so there is nothing to reply to. */
+  canRSVP: boolean;
 }
 
-export default function DetailsSection({ onAttendClick, lang, myRSVP }: DetailsSectionProps) {
+export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }: DetailsSectionProps) {
   const t = translations[lang].details;
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
   const [isLandscapeOpen, setIsLandscapeOpen] = useState(false);
@@ -258,6 +260,10 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP }: DetailsS
           {myRSVP ? (
             <div className="mt-8 flex justify-center">
               <RSVPSummary rsvp={myRSVP} lang={lang} />
+            </div>
+          ) : !canRSVP ? (
+            <div className="mt-8 flex justify-center">
+              <NeedInvite lang={lang} />
             </div>
           ) : (
             <button

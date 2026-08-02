@@ -9,15 +9,45 @@ import AudioPlayer from "./components/AudioPlayer";
 import ThankYouModal from "./components/ThankYouModal";
 import { RSVPFormData } from "./types";
 import { translations } from "./translations";
-import { readMyRSVP, saveMyRSVP } from "./rsvpStorage";
+import { getRSVP } from "./firebase";
+
+// Every guest gets a personal link, `?g=<code>`, where the code is their invite's
+// Firestore document id. It's a search param rather than a hash so it composes
+// with the language hashes below: ?g=k3d9x2#cn
+const inviteCode = new URLSearchParams(window.location.search).get("g") ?? "";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<"invitation" | "admin">("invitation");
   const [lang, setLang] = useState<"en" | "cn">("en");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [successData, setSuccessData] = useState<RSVPFormData | null>(null);
-  // This device's own reply, so a returning guest sees their answer, not a form
-  const [myRSVP, setMyRSVP] = useState<RSVPFormData | null>(() => readMyRSVP());
+  // The invite this link points at: undefined while loading, null if the code is
+  // missing or unrecognised. Looked up in Firestore, so a guest who already
+  // replied sees their answer on any device, not just the one they replied from.
+  const [invite, setInvite] = useState<RSVPFormData | null | undefined>(
+    inviteCode ? undefined : null
+  );
+
+  useEffect(() => {
+    if (!inviteCode) return;
+    let cancelled = false;
+    getRSVP(inviteCode)
+      .catch((err) => {
+        // Offline or Firestore down. Treated the same as an unknown code: the
+        // guest is pointed at WhatsApp rather than at a form that can't save.
+        console.error("Invite lookup failed:", err);
+        return null;
+      })
+      .then((found) => {
+        if (!cancelled) setInvite(found);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // An invite counts as answered once it carries a submission time.
+  const myRSVP = invite && invite.timestamp ? invite : null;
 
   // Hash/Path routing to switch between English/Chinese view & Admin dashboard
   useEffect(() => {
@@ -26,7 +56,7 @@ export default function App() {
       const path = window.location.pathname;
 
       // 1. Owner Admin View takes priority
-      if (hash === "#admin") {
+      if (hash === "#97+97=0201/admin") {
         setCurrentView("admin");
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
@@ -74,7 +104,8 @@ export default function App() {
   }, []);
 
   const handleOpenModal = () => {
-    setIsModalOpen(true);
+    // Guarded: without a resolved invite there is no document to write the reply to.
+    if (invite) setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
@@ -83,8 +114,7 @@ export default function App() {
 
   const handleRSVPSuccess = (data: RSVPFormData) => {
     setSuccessData(data);
-    saveMyRSVP(data);
-    setMyRSVP(data);
+    setInvite(data);
     setIsModalOpen(false);
   };
 
@@ -160,11 +190,17 @@ export default function App() {
         <HeroSection
           lang={lang}
           myRSVP={myRSVP}
+          canRSVP={invite !== null}
           onAttendClick={handleOpenModal}
         />
 
         {/* 2. Details & RSVP Section */}
-        <DetailsSection onAttendClick={handleOpenModal} lang={lang} myRSVP={myRSVP} />
+        <DetailsSection
+          onAttendClick={handleOpenModal}
+          lang={lang}
+          myRSVP={myRSVP}
+          canRSVP={invite !== null}
+        />
 
         {/* 3. Dress Code Section */}
         <DressCodeSection lang={lang} />
@@ -192,13 +228,18 @@ export default function App() {
         </div>
       </footer>
 
-      {/* RSVP Form Modal */}
-      <RSVPModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onSubmitSuccess={handleRSVPSuccess}
-        lang={lang}
-      />
+      {/* RSVP Form Modal — only mounted once we know which invite it writes to,
+          which also seeds the name field with the one on the invite. */}
+      {invite && (
+        <RSVPModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          onSubmitSuccess={handleRSVPSuccess}
+          lang={lang}
+          code={invite.id}
+          invitedName={invite.guestName}
+        />
+      )}
 
       {/* Thank-you note shown once the reply is safely saved */}
       <ThankYouModal data={successData} lang={lang} onClose={handleCloseThankYou} />

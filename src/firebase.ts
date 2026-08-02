@@ -3,12 +3,16 @@ import {
   getFirestore,
   collection,
   addDoc,
+  getDoc,
   getDocs,
   doc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
-  onSnapshot
+  onSnapshot,
+  type DocumentData,
+  type DocumentSnapshot
 } from "firebase/firestore";
 import { RSVPFormData, TimelineItem } from "./types";
 import firebaseConfigJson from "../firebase-applet-config.json";
@@ -31,6 +35,62 @@ export const db = getFirestore(app, firebaseConfigJson.firestoreDatabaseId || "(
 const COLLECTION_NAME = "rsvps";
 const TIMELINE_COLLECTION = "timeline";
 
+// Invite codes double as the Firestore document id, so they live in URLs and get
+// read out over the phone: no 0/1/i/l/o, nothing case-sensitive to mishear.
+const CODE_ALPHABET = "23456789abcdefghjkmnpqrstuvwxyz";
+const CODE_LENGTH = 6;
+
+function generateInviteCode(): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(CODE_LENGTH));
+  return Array.from(bytes, (b) => CODE_ALPHABET[b % CODE_ALPHABET.length]).join("");
+}
+
+/**
+ * Shape a Firestore document into an RSVPFormData. An empty `timestamp` is the
+ * marker for an invite that has been sent but not yet answered — see SCHEMA.md.
+ */
+function toRSVP(docSnap: DocumentSnapshot<DocumentData>): RSVPFormData {
+  const data = docSnap.data() ?? {};
+  return {
+    id: docSnap.id,
+    guestName: data.guestName || "",
+    guestCount: data.guestCount || 0,
+    phone: data.phone || "",
+    email: data.email || undefined,
+    dietChoice: data.dietChoice || "standard",
+    attending: data.attending ?? true,
+    timestamp: data.timestamp ?? "",
+  };
+}
+
+/**
+ * Create a pending invite. The generated code is the document id, so the guest's
+ * personal link is just `?g=<returned id>`.
+ */
+export async function createInvite(guestName: string): Promise<RSVPFormData> {
+  const invite = {
+    guestName,
+    guestCount: 0,
+    phone: "",
+    email: "",
+    dietChoice: "standard" as const,
+    attending: false,
+    timestamp: "", // "" = invited, not yet replied
+  };
+  const code = generateInviteCode();
+  await setDoc(doc(db, COLLECTION_NAME, code), invite);
+  return { ...invite, id: code };
+}
+
+/**
+ * Look up a single invite by its code. Returns null for codes that don't exist,
+ * so a mistyped link can be told apart from a network failure (which throws).
+ */
+export async function getRSVP(code: string): Promise<RSVPFormData | null> {
+  const docSnap = await getDoc(doc(db, COLLECTION_NAME, code));
+  return docSnap.exists() ? toRSVP(docSnap) : null;
+}
+
 /**
  * Fetch all RSVP submissions from Firestore, ordered by timestamp desc or created time
  */
@@ -39,19 +99,9 @@ export async function getRSVPs(): Promise<RSVPFormData[]> {
     const q = query(collection(db, COLLECTION_NAME));
     const querySnapshot = await getDocs(q);
     const results: RSVPFormData[] = [];
-    
+
     querySnapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      results.push({
-        id: docSnap.id,
-        guestName: data.guestName || "",
-        guestCount: data.guestCount || 0,
-        phone: data.phone || "",
-        email: data.email || undefined,
-        dietChoice: data.dietChoice || "standard",
-        attending: data.attending ?? true,
-        timestamp: data.timestamp || new Date().toLocaleString(),
-      });
+      results.push(toRSVP(docSnap));
     });
 
     // Sort by timestamp if possible, otherwise keep natural order
@@ -74,17 +124,7 @@ export function onRSVPsSnapshot(callback: (items: RSVPFormData[]) => void): () =
   return onSnapshot(q, (querySnapshot) => {
     const results: RSVPFormData[] = [];
     querySnapshot.forEach((docSnap) => {
-      const data = docSnap.data();
-      results.push({
-        id: docSnap.id,
-        guestName: data.guestName || "",
-        guestCount: data.guestCount || 0,
-        phone: data.phone || "",
-        email: data.email || undefined,
-        dietChoice: data.dietChoice || "standard",
-        attending: data.attending ?? true,
-        timestamp: data.timestamp || new Date().toLocaleString(),
-      });
+      results.push(toRSVP(docSnap));
     });
 
     results.sort((a, b) => {
@@ -97,30 +137,6 @@ export function onRSVPsSnapshot(callback: (items: RSVPFormData[]) => void): () =
   }, (err) => {
     console.error("Error subscribing to RSVPs:", err);
   });
-}
-
-/**
- * Add a new RSVP submission to Firestore
- */
-export async function addRSVP(rsvp: Omit<RSVPFormData, "id">): Promise<RSVPFormData> {
-  try {
-    const docRef = await addDoc(collection(db, COLLECTION_NAME), {
-      guestName: rsvp.guestName,
-      guestCount: rsvp.guestCount,
-      phone: rsvp.phone,
-      email: rsvp.email || "",
-      dietChoice: rsvp.dietChoice,
-      attending: rsvp.attending,
-      timestamp: rsvp.timestamp,
-    });
-    return {
-      ...rsvp,
-      id: docRef.id,
-    };
-  } catch (error) {
-    console.error("Error adding RSVP to Firestore:", error);
-    throw error;
-  }
 }
 
 /**

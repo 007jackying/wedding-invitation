@@ -99,7 +99,7 @@ export default function DressCodeSection({ lang }: DressCodeSectionProps) {
 
         <div className="flex flex-col gap-20 sm:gap-28">
           <DressRow
-            photoUrl="https://images.unsplash.com/photo-1591555200813-b5537524440b?q=80&w=1000&auto=format&fit=crop"
+            photoUrl="https://as1.ftcdn.net/v2/jpg/04/01/32/32/1000_F_401323209_6hckbR1E74vh66IhY6YLIduivHMd9306.jpg"
             photoAlt="Bride dress inspiration"
             photoCaption={lang === "cn" ? "灵感 — 象牙白与淡雅色系" : "Inspiration — elegance in ivory & pastels"}
             icon={Flower}

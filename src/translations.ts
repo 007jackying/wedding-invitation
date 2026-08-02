@@ -74,6 +74,8 @@ export interface TranslationSchema {
     vegetarian: string;
     standard: string;
     change: string;
+    needInviteTitle: string;
+    needInviteBody: string;
   };
   modal: {
     title: string;
@@ -182,6 +184,9 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
       vegetarian: "Vegetarian",
       standard: "Standard meal",
       change: "Need to change something?",
+      needInviteTitle: "Invitation link needed",
+      needInviteBody:
+        "Replies are tied to a personal invitation link. Message us and we'll send yours over.",
     },
     modal: {
       title: "Your Reply",
@@ -288,6 +293,8 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
       vegetarian: "素食",
       standard: "普通荤食",
       change: "需要修改吗？",
+      needInviteTitle: "需要专属请柬链接",
+      needInviteBody: "答复需通过专属请柬链接提交。请与我们联系，我们会把您的链接发给您。",
     },
     modal: {
       title: "您的答复",

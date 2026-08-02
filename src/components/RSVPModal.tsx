@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Heart, Loader2, Phone, Mail, User, Users, Leaf, Utensils } from "lucide-react";
-import { GOOGLE_FORM_CONFIG, RSVPFormData, RSVPModalProps } from "../types";
+import { RSVPFormData, RSVPModalProps } from "../types";
 import { translations } from "../translations";
-import { addRSVP } from "../firebase";
+import { updateRSVP } from "../firebase";
 
-export default function RSVPModal({ isOpen, onClose, onSubmitSuccess, lang }: RSVPModalProps) {
+export default function RSVPModal({ isOpen, onClose, onSubmitSuccess, lang, code, invitedName }: RSVPModalProps) {
   const t = translations[lang].modal;
 
-  const [guestName, setGuestName] = useState("");
+  const [guestName, setGuestName] = useState(invitedName);
   const [guestCount, setGuestCount] = useState<number | "">("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -41,51 +41,22 @@ export default function RSVPModal({ isOpen, onClose, onSubmitSuccess, lang }: RS
     setIsSubmitting(true);
 
     try {
-      // Setup url-encoded payload for Google Form headless submission
-      const formPayload = new URLSearchParams();
-      formPayload.append(GOOGLE_FORM_CONFIG.fields.guestName, guestName.trim());
-      formPayload.append(GOOGLE_FORM_CONFIG.fields.guestCount, String(guestCount));
-      formPayload.append(GOOGLE_FORM_CONFIG.fields.phone, phone.trim());
-      if (email.trim()) {
-        formPayload.append(GOOGLE_FORM_CONFIG.fields.email, email.trim());
-      }
-      if ((GOOGLE_FORM_CONFIG.fields as any).dietChoice) {
-        formPayload.append((GOOGLE_FORM_CONFIG.fields as any).dietChoice, dietChoice);
-      }
-
-      // Direct, headless Google Form submission
-      try {
-        await fetch(GOOGLE_FORM_CONFIG.actionUrl, {
-          method: "POST",
-          mode: "no-cors", // Required to bypass CORS restriction. Data is safely sent even with opaque response.
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: formPayload,
-        });
-      } catch (gfErr) {
-        console.warn("Google Form submission failed:", gfErr);
-      }
-
-      // Save to Firebase Firestore — this is the record that counts, so a
-      // failure here has to reach the guest rather than be swallowed.
-      const submittedData: RSVPFormData = await addRSVP({
+      // Fill in the invite this guest was sent, rather than creating a new doc —
+      // the code in their link IS the document id. A failure here has to reach
+      // the guest rather than be swallowed.
+      const submittedData: RSVPFormData = {
+        id: code,
         guestName: guestName.trim(),
-        guestCount: Number(guestCount),
-        phone: phone.trim(),
-        email: email.trim() || undefined,
-        dietChoice,
+        // A decline carries no party size, phone or diet — see the `attending` guard above.
+        guestCount: attending ? Number(guestCount) : 0,
+        phone: attending ? phone.trim() : "",
+        email: attending ? email.trim() : "",
+        dietChoice: attending ? dietChoice : "standard",
         attending,
         timestamp: new Date().toLocaleString(),
-      });
-
-      // Reset fields
-      setGuestName("");
-      setGuestCount("");
-      setPhone("");
-      setEmail("");
-      setDietChoice("standard");
-      setAttending(true);
+      };
+      const { id: _id, ...fields } = submittedData;
+      await updateRSVP(code, fields);
 
       // Close modal & trigger success sequence
       onSubmitSuccess(submittedData);

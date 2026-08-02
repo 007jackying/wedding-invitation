@@ -21,11 +21,12 @@ import {
   ArrowUpDown,
   AlertTriangle,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Link2 as LinkIcon
 } from "lucide-react";
 import { ADMIN_PIN, RSVPFormData, TimelineItem } from "../types";
 import {
-  addRSVP,
+  createInvite,
   updateRSVP,
   deleteRSVP,
   clearAllRSVPs,
@@ -41,7 +42,8 @@ interface AdminDashboardProps {
 }
 
 export default function AdminDashboard({ onBack }: AdminDashboardProps) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // ponytail: skip the PIN gate on the local dev server
+  const [isAuthenticated, setIsAuthenticated] = useState(import.meta.env.DEV);
   const [pin, setPin] = useState<string[]>(Array(6).fill(""));
   const [pinError, setPinError] = useState(false);
   const [showPin, setShowPin] = useState(false);
@@ -73,13 +75,9 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
   const [editEmail, setEditEmail] = useState("");
   const [editDiet, setEditDiet] = useState<"vegetarian" | "standard">("standard");
 
-  // For manually adding a new guest
+  // For creating a new invite (name only — the guest fills in the rest)
   const [isAddingGuest, setIsAddingGuest] = useState(false);
   const [newGuestName, setNewGuestName] = useState("");
-  const [newGuestCount, setNewGuestCount] = useState<number>(1);
-  const [newGuestPhone, setNewGuestPhone] = useState("");
-  const [newGuestEmail, setNewGuestEmail] = useState("");
-  const [newGuestDiet, setNewGuestDiet] = useState<"vegetarian" | "standard">("standard");
 
   // Timeline state
   const [timelineList, setTimelineList] = useState<TimelineItem[]>([]);
@@ -191,17 +189,26 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
       alert("Name cannot be empty");
       return;
     }
-    if (editCount < 1) {
-      alert("Party size must be at least 1");
+    // 0 is how a decline is recorded on the guest's behalf, so it's allowed here
+    // even though the guest-facing form requires at least 1 to accept.
+    if (editCount < 0) {
+      alert("Party size cannot be negative");
       return;
     }
+
+    // Editing a still-pending invite is how a reply given by phone or in person
+    // gets recorded, so it counts as that guest's answer from here on.
+    const wasPending = submissions.find((sub) => sub.id === id)?.timestamp === "";
 
     const updates = {
       guestName: editName.trim(),
       guestCount: Number(editCount),
       phone: editPhone.trim(),
-      email: editEmail.trim() || undefined,
+      email: editEmail.trim() || "",
       dietChoice: editDiet,
+      ...(wasPending
+        ? { attending: editCount > 0, timestamp: new Date().toLocaleString() }
+        : {}),
     };
 
     setIsLoading(true);
@@ -227,40 +234,42 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     triggerToast("Reply updated");
   };
 
+  // Adding a guest creates a pending invite — a name and a link, nothing else.
+  // The rest of the row is whatever the guest themselves fills in; if a reply
+  // arrives by phone instead, type it into the row with the inline editor.
   const handleAddGuest = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newGuestName.trim()) {
       alert("Guest name cannot be empty");
       return;
     }
-    if (newGuestCount < 1) {
-      alert("Party size must be at least 1");
-      return;
-    }
 
     setIsLoading(true);
     try {
-      await addRSVP({
-        guestName: newGuestName.trim(),
-        guestCount: Number(newGuestCount),
-        phone: newGuestPhone.trim(),
-        email: newGuestEmail.trim() || undefined,
-        dietChoice: newGuestDiet,
-        attending: true,
-        timestamp: new Date().toLocaleString(),
-      });
-      triggerToast("Guest added successfully!");
+      const created = await createInvite(newGuestName.trim());
+      await copyInviteLink(created.id, `Invite created — link copied for ${created.guestName}`);
       setNewGuestName("");
-      setNewGuestCount(1);
-      setNewGuestPhone("");
-      setNewGuestEmail("");
-      setNewGuestDiet("standard");
       setIsAddingGuest(false);
     } catch (err) {
       console.error(err);
       alert("Failed to add guest.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const inviteLink = (code: string) =>
+    `${window.location.origin}${window.location.pathname}?g=${code}`;
+
+  const copyInviteLink = async (code: string, message = "Invite link copied") => {
+    const link = inviteLink(code);
+    try {
+      await navigator.clipboard.writeText(link);
+      triggerToast(message);
+    } catch {
+      // Clipboard needs a secure context and permission; show the link so the
+      // couple can still copy it by hand rather than losing it.
+      window.prompt("Copy this guest's invite link:", link);
     }
   };
 
@@ -395,17 +404,24 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
       return;
     }
 
-    // Define CSV header and map rows
-    const headers = ["ID", "Guest Name", "Guest Count", "Phone", "Email", "Dietary Preference", "Submission Time"];
-    const rows = submissions.map((sub) => [
-      sub.id,
-      `"${sub.guestName.replace(/"/g, '""')}"`,
-      sub.guestCount,
-      `"${sub.phone}"`,
-      sub.email ? `"${sub.email}"` : "N/A",
-      `"${sub.dietChoice || "standard"}"`,
-      `"${sub.timestamp}"`
-    ]);
+    // Exports what's on screen (search and sort applied), including the status
+    // and invite link — without those a decline reads the same as an acceptance.
+    const headers = ["Code", "Guest Name", "Status", "Attending", "Guest Count", "Phone", "Email", "Dietary Preference", "Submission Time", "Invite Link"];
+    const rows = sortedSubmissions.map((sub) => {
+      const hasReplied = sub.timestamp !== "";
+      return [
+        sub.id,
+        `"${sub.guestName.replace(/"/g, '""')}"`,
+        hasReplied ? "replied" : "pending",
+        hasReplied ? (sub.attending ? "yes" : "no") : "",
+        hasReplied ? sub.guestCount : "",
+        `"${sub.phone}"`,
+        sub.email ? `"${sub.email}"` : "",
+        hasReplied ? `"${sub.dietChoice || "standard"}"` : "",
+        `"${sub.timestamp}"`,
+        `"${inviteLink(sub.id)}"`,
+      ];
+    });
 
     const csvContent = "data:text/csv;charset=utf-8," 
       + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
@@ -420,9 +436,9 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     triggerToast("Guestlist CSV file downloaded successfully!");
   };
 
-  // Flags rows sharing a name or phone with another row. The guest-facing form
-  // can't edit a reply, so a repeat submission lands as a second document —
-  // this is how the couple spots one. Heuristic, not authoritative.
+  // Flags rows sharing a name or phone with another row. A guest can no longer
+  // file a second reply — their link writes to one document — so what this
+  // catches now is the same person invited twice. Heuristic, not authoritative.
   const duplicateIds = useMemo(() => {
     const byName = new Map<string, string[]>();
     const byPhone = new Map<string, string[]>();
@@ -476,14 +492,19 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     });
   }, [submissions, searchQuery, sortField, sortDirection]);
 
-  const totalResponses = submissions.length;
-  const totalGuests = submissions.reduce((sum, item) => sum + item.guestCount, 0);
-  const vegetarianCount = submissions
+  // Every stat below counts replies only. A pending invite carries attending:false
+  // and guestCount:0, so counting it would read as a decline and drag the rate down.
+  const replied = submissions.filter((sub) => sub.timestamp !== "");
+  const pendingCount = submissions.length - replied.length;
+
+  const totalResponses = replied.length;
+  const totalGuests = replied.reduce((sum, item) => sum + item.guestCount, 0);
+  const vegetarianCount = replied
     .filter((sub) => sub.dietChoice === "vegetarian")
     .reduce((sum, item) => sum + item.guestCount, 0);
   const standardCount = totalGuests - vegetarianCount;
   // Docs written before the `attending` field existed are counted as joining.
-  const acceptedCount = submissions.filter((sub) => sub.attending !== false).length;
+  const acceptedCount = replied.filter((sub) => sub.attending !== false).length;
   const declinedCount = totalResponses - acceptedCount;
   const acceptanceRate = totalResponses
     ? Math.round((acceptedCount / totalResponses) * 100)
@@ -654,7 +675,13 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                   <p className="text-xs font-semibold uppercase tracking-wider text-brand-olive">Total Responses</p>
                   <h3 className="text-2xl sm:text-3xl font-serif font-semibold text-brand-charcoal mt-1">
                     {totalResponses}
+                    <span className="text-base text-brand-charcoal/40"> / {submissions.length}</span>
                   </h3>
+                  <p className="text-[11px] text-brand-charcoal/60 mt-1">
+                    {pendingCount === 0
+                      ? "Everyone invited has replied"
+                      : `${pendingCount} still to reply`}
+                  </p>
                 </div>
               </div>
 
@@ -731,7 +758,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                   onClick={() => setIsAddingGuest(!isAddingGuest)}
                   className="px-4 py-2.5 bg-brand-charcoal text-brand-cream hover:bg-brand-olive transition-colors rounded-xl text-xs font-semibold uppercase tracking-widest cursor-pointer shadow-sm"
                 >
-                  {isAddingGuest ? "Close Form" : "Add Guest Manually"}
+                  {isAddingGuest ? "Close Form" : "Create Invite"}
                 </button>
               </div>
 
@@ -746,72 +773,25 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                     className="bg-white border border-brand-rose/20 rounded-2xl p-6 shadow-md space-y-4 overflow-hidden"
                   >
                     <h4 className="text-xs font-semibold tracking-wider text-brand-olive uppercase mb-2">
-                      New Guest Details
+                      New Invite
                     </h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-semibold text-brand-charcoal/70 mb-1">
-                          Guest Name
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          value={newGuestName}
-                          onChange={(e) => setNewGuestName(e.target.value)}
-                          placeholder="e.g., Jane Smith"
-                          className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-brand-charcoal/70 mb-1">
-                          Party Size
-                        </label>
-                        <input
-                          type="number"
-                          required
-                          min={1}
-                          value={newGuestCount}
-                          onChange={(e) => setNewGuestCount(Number(e.target.value))}
-                          className="w-32 px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-brand-charcoal/70 mb-1">
-                          Phone Number
-                        </label>
-                        <input
-                          type="text"
-                          value={newGuestPhone}
-                          onChange={(e) => setNewGuestPhone(e.target.value)}
-                          placeholder="e.g., +1 (555) 019-2834"
-                          className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-brand-charcoal/70 mb-1">
-                          Email (Optional)
-                        </label>
-                        <input
-                          type="email"
-                          value={newGuestEmail}
-                          onChange={(e) => setNewGuestEmail(e.target.value)}
-                          placeholder="e.g., jane@example.com"
-                          className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-semibold text-brand-charcoal/70 mb-1">
-                          Dietary Preference
-                        </label>
-                        <select
-                          value={newGuestDiet}
-                          onChange={(e) => setNewGuestDiet(e.target.value as "standard" | "vegetarian")}
-                          className="px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5 cursor-pointer"
-                        >
-                          <option value="standard">Standard Meal 🥩</option>
-                          <option value="vegetarian">Vegetarian 🌱</option>
-                        </select>
-                      </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-brand-charcoal/70 mb-1">
+                        Guest Name
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newGuestName}
+                        onChange={(e) => setNewGuestName(e.target.value)}
+                        placeholder="e.g., Jane Smith"
+                        className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                      />
+                      <p className="mt-2 text-[11px] text-brand-charcoal/50 leading-relaxed">
+                        Creates a personal invite link and copies it to your clipboard. Party size,
+                        phone and meal come from the guest when they reply — or edit the row yourself
+                        if they tell you in person.
+                      </p>
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
                       <button
@@ -825,7 +805,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                         type="submit"
                         className="px-5 py-2 bg-brand-charcoal text-white hover:bg-brand-accent transition-colors rounded-xl text-xs font-semibold tracking-wider uppercase cursor-pointer"
                       >
-                        Save Guest
+                        Create &amp; Copy Link
                       </button>
                     </div>
                   </motion.form>
@@ -894,7 +874,8 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                                 <td className="py-3 px-4 text-center">
                                   <input
                                     type="number"
-                                    min={1}
+                                    min={0}
+                                    title="0 records a decline"
                                     value={editCount}
                                     onChange={(e) => setEditCount(Number(e.target.value))}
                                     className="w-16 px-2.5 py-1.5 bg-white border border-brand-rose/20 rounded-lg text-sm text-center text-brand-charcoal focus:outline-none focus:border-brand-rose"
@@ -967,8 +948,24 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                                       </AlertTriangle>
                                     )}
                                     {sub.guestName}
+                                    {!sub.timestamp && (
+                                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-brand-cream text-brand-olive border border-brand-olive/25">
+                                        Invited
+                                      </span>
+                                    )}
                                   </span>
                                 </td>
+                                {!sub.timestamp ? (
+                                  // A pending invite has no answers yet, so the five detail
+                                  // columns would just show zeroes and a meal they never picked.
+                                  <td
+                                    colSpan={5}
+                                    className="py-4 px-6 text-xs italic text-brand-charcoal/40"
+                                  >
+                                    Awaiting reply — send them their invite link
+                                  </td>
+                                ) : (
+                                  <>
                                 <td className="py-4 px-6 text-center">
                                   <span className="inline-flex items-center justify-center bg-brand-blush/40 text-brand-rose font-semibold px-2.5 py-1 rounded-lg text-xs min-w-8">
                                     {sub.guestCount}
@@ -1004,8 +1001,17 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                                 <td className="py-4 px-6 text-xs text-brand-charcoal/60">
                                   {sub.timestamp}
                                 </td>
+                                  </>
+                                )}
                                 <td className="py-4 px-6 text-center">
                                   <div className="flex items-center justify-center gap-1">
+                                    <button
+                                      onClick={() => copyInviteLink(sub.id)}
+                                      className="text-brand-olive hover:text-brand-charcoal hover:bg-brand-cream/40 p-2 rounded-lg transition-colors cursor-pointer"
+                                      title="Copy this guest's invite link"
+                                    >
+                                      <LinkIcon className="w-4 h-4" />
+                                    </button>
                                     <button
                                       onClick={() => startEditing(sub)}
                                       className="text-brand-olive hover:text-brand-charcoal hover:bg-brand-cream/40 p-2 rounded-lg transition-colors cursor-pointer"

@@ -1,29 +1,13 @@
-/**
- * Configuration options for the headless Google Form submission.
- * Users can replace these placeholder values with their real Google Form action URL and Entry IDs.
- */
-export const GOOGLE_FORM_CONFIG = {
-  // Replace this with your actual Google Form URL. It must end with "/formResponse"
-  actionUrl: "https://docs.google.com/forms/d/e/1FAIpQLSfD_YOUR_ACTUAL_FORM_ID_HERE/formResponse",
-  
-  // Replace these with the specific 'name' attributes of the inputs on your Google Form
-  fields: {
-    guestName: "entry.123456789",    // Input ID for Full Name
-    guestCount: "entry.987654321",  // Input ID for Number of People Attending
-    phone: "entry.111222333",       // Input ID for Phone Number
-    email: "entry.444555666",       // Input ID for Email (Optional)
-  }
-};
-
 // Couple's WhatsApp contacts, shown to guests who need to change their reply.
 // International format, digits only, no leading "+". Used to build wa.me links.
-// TODO: replace both placeholders with the real numbers before sharing the link.
 export const CONTACTS = [
   { name: "Eva", whatsapp: "60178688037" },
   { name: "Vincent", whatsapp: "60176384027" },
 ];
 
-export const ADMIN_PIN = "123456"; // Default secure 6-digit pin to view guestlist
+// 6-digit pin to view the guestlist. Set VITE_ADMIN_PIN at build time; unset = nobody gets in.
+// ponytail: this ships in the client bundle, so it's a speed bump, not a secret.
+export const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN;
 
 export interface RSVPFormData {
   id: string;
@@ -41,6 +25,10 @@ export interface RSVPModalProps {
   onClose: () => void;
   onSubmitSuccess: (data: RSVPFormData) => void;
   lang: "en" | "cn";
+  /** Invite code from ?g= — the Firestore doc id this reply is written back to. */
+  code: string;
+  /** Name the couple put on the invite; the guest can still correct it. */
+  invitedName: string;
 }
 
 export interface TimelineItem {

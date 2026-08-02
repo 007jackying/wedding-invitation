@@ -58,29 +58,74 @@ export default function RSVPSummary({ rsvp, lang }: RSVPSummaryProps) {
       <p className="mt-4 font-sans text-[10px] tracking-[0.15em] uppercase text-brand-cream/60">
         {t.change}
       </p>
-      <div className="mt-2 flex flex-wrap justify-center gap-2">
-        {CONTACTS.map((contact) => (
-          <a
-            key={contact.name}
-            href={`https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(
-              lang === "cn"
-                ? `${contact.name} 您好，我是 ${rsvp.guestName}，想修改婚礼出席答复。`
-                : `Hi ${contact.name}, this is ${rsvp.guestName}. I'd like to update my reply for the wedding.`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={
-              lang === "cn"
-                ? `通过 WhatsApp 联系${contact.name}`
-                : `Message ${contact.name} on WhatsApp`
-            }
-            className="inline-flex items-center gap-1.5 rounded-full border border-brand-gold/40 px-3 py-1.5 font-sans font-semibold text-[11px] tracking-[0.1em] text-brand-cream hover:bg-brand-cream/10 hover:border-brand-gold transition-colors focus:outline-none focus:ring-2 focus:ring-brand-gold/60"
-          >
-            <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366] shrink-0" />
-            {contact.name}
-          </a>
-        ))}
-      </div>
+      <ContactLinks
+        lang={lang}
+        message={(name) =>
+          lang === "cn"
+            ? `${name} 您好，我是 ${rsvp.guestName}，想修改婚礼出席答复。`
+            : `Hi ${name}, this is ${rsvp.guestName}. I'd like to update my reply for the wedding.`
+        }
+      />
+    </div>
+  );
+}
+
+// Both cards below hand the guest off to WhatsApp; only the prefilled message
+// differs, so the row of contact buttons is written once.
+function ContactLinks({
+  lang,
+  message,
+}: {
+  lang: "en" | "cn";
+  message: (contactName: string) => string;
+}) {
+  return (
+    <div className="mt-2 flex flex-wrap justify-center gap-2">
+      {CONTACTS.map((contact) => (
+        <a
+          key={contact.name}
+          href={`https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(message(contact.name))}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={
+            lang === "cn"
+              ? `通过 WhatsApp 联系${contact.name}`
+              : `Message ${contact.name} on WhatsApp`
+          }
+          className="inline-flex items-center gap-1.5 rounded-full border border-brand-gold/40 px-3 py-1.5 font-sans font-semibold text-[11px] tracking-[0.1em] text-brand-cream hover:bg-brand-cream/10 hover:border-brand-gold transition-colors focus:outline-none focus:ring-2 focus:ring-brand-gold/60"
+        >
+          <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366] shrink-0" />
+          {contact.name}
+        </a>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Shown in place of the RSVP button when the visitor arrived without a valid
+ * `?g=` code. Replying requires a personal invite link, so the only thing to
+ * offer is a way to ask the couple for one.
+ */
+export function NeedInvite({ lang }: { lang: "en" | "cn" }) {
+  const t = translations[lang].rsvp;
+
+  return (
+    <div className="w-full max-w-xs mx-auto rounded-2xl border border-brand-gold/40 bg-black/40 backdrop-blur-sm px-5 py-4 text-center">
+      <p className="font-sans font-semibold text-[11px] tracking-[0.18em] uppercase text-brand-cream">
+        {t.needInviteTitle}
+      </p>
+      <p className="mt-3 font-sans text-xs text-brand-cream/70 leading-relaxed">
+        {t.needInviteBody}
+      </p>
+      <ContactLinks
+        lang={lang}
+        message={(name) =>
+          lang === "cn"
+            ? `${name} 您好，可以把我的婚礼请柬专属链接发给我吗？`
+            : `Hi ${name}, could you send me my personal wedding invite link?`
+        }
+      />
     </div>
   );
 }
