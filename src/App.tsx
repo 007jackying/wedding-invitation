@@ -206,27 +206,6 @@ export default function App() {
         <DressCodeSection lang={lang} />
       </main>
 
-      {/* Footer copyright with subtle guestbook administrative link */}
-      <footer className="bg-transparent border-t border-brand-rose/10 py-12 px-6 text-center font-sans">
-        <p className="text-xs text-brand-charcoal/50 tracking-widest uppercase">
-          {t.footer.copyright}
-        </p>
-        <p className="text-[10px] text-brand-olive mt-2 tracking-widest">
-          {t.footer.designed}
-        </p>
-
-        {/* Subtle, beautiful owner lock trigger */}
-        <div className="mt-8 flex justify-center">
-          <button
-            onClick={navigateToAdmin}
-            className="inline-flex items-center gap-1.5 text-[10px] font-semibold text-brand-charcoal/30 hover:text-brand-rose uppercase tracking-widest transition-colors duration-300 cursor-pointer p-1 rounded-sm focus:outline-none focus:ring-1 focus:ring-brand-rose"
-            title="Secure Owner Access"
-          >
-            <Lock className="w-3 h-3" />
-            <span>{t.footer.register}</span>
-          </button>
-        </div>
-      </footer>
 
       {/* RSVP Form Modal — only mounted once we know which invite it writes to,
           which also seeds the name field with the one on the invite. */}
