@@ -1,15 +1,14 @@
 import { initializeApp } from "firebase/app";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
-  getDocs, 
-  doc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  setDoc, 
-  onSnapshot 
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  doc,
+  updateDoc,
+  deleteDoc,
+  query,
+  onSnapshot
 } from "firebase/firestore";
 import { RSVPFormData, TimelineItem } from "./types";
 import firebaseConfigJson from "../firebase-applet-config.json";
@@ -31,41 +30,6 @@ export const db = getFirestore(app, firebaseConfigJson.firestoreDatabaseId || "(
 
 const COLLECTION_NAME = "rsvps";
 const TIMELINE_COLLECTION = "timeline";
-
-export const DEFAULT_TIMELINE: TimelineItem[] = [
-  {
-    id: "item1",
-    timeEn: "06:00 PM",
-    textEn: "Photo Session",
-    timeCn: "晚上 06:00",
-    textCn: "拍照环节",
-    order: 1
-  },
-  {
-    id: "item2",
-    timeEn: "07:00 PM",
-    textEn: "Ceremony Begins",
-    timeCn: "晚上 07:00",
-    textCn: "婚礼仪式开始",
-    order: 2
-  },
-  {
-    id: "item3",
-    timeEn: "10:00 PM",
-    textEn: "Dinner Ends & Thank You",
-    timeCn: "晚上 10:00",
-    textCn: "晚宴结束 · 答谢来宾",
-    order: 3
-  },
-  {
-    id: "item4",
-    timeEn: "10:30 PM",
-    textEn: "Farewell",
-    timeCn: "晚上 10:30",
-    textCn: "送客离场",
-    order: 4
-  }
-];
 
 /**
  * Fetch all RSVP submissions from Firestore, ordered by timestamp desc or created time
@@ -206,34 +170,6 @@ export async function clearAllRSVPs(): Promise<void> {
 }
 
 /**
- * Helper to seed the database with mock guests if it's empty
- */
-export async function seedRSVPsIfEmpty(mockGuests: RSVPFormData[]): Promise<RSVPFormData[]> {
-  try {
-    const current = await getRSVPs();
-    if (current.length === 0) {
-      const seeded: RSVPFormData[] = [];
-      for (const guest of mockGuests) {
-        const { id, ...rest } = guest;
-        const docRef = doc(collection(db, COLLECTION_NAME));
-        await setDoc(docRef, {
-          ...rest
-        });
-        seeded.push({
-          ...rest,
-          id: docRef.id
-        });
-      }
-      return seeded;
-    }
-    return current;
-  } catch (error) {
-    console.error("Error seeding RSVPs:", error);
-    return mockGuests;
-  }
-}
-
-/**
  * Fetch all timeline events from Firestore, sorted by order index
  */
 export async function getTimeline(): Promise<TimelineItem[]> {
@@ -332,33 +268,5 @@ export async function deleteTimelineItem(id: string): Promise<void> {
   } catch (error) {
     console.error("Error deleting timeline item:", error);
     throw error;
-  }
-}
-
-/**
- * Seeds the timeline collection if empty
- */
-export async function seedTimelineIfEmpty(): Promise<TimelineItem[]> {
-  try {
-    const current = await getTimeline();
-    if (current.length === 0) {
-      const seeded: TimelineItem[] = [];
-      for (const item of DEFAULT_TIMELINE) {
-        const { id, ...rest } = item;
-        const docRef = doc(db, TIMELINE_COLLECTION, id);
-        await setDoc(docRef, {
-          ...rest
-        });
-        seeded.push({
-          ...rest,
-          id: docRef.id
-        });
-      }
-      return seeded;
-    }
-    return current;
-  } catch (error) {
-    console.error("Error seeding timeline:", error);
-    return DEFAULT_TIMELINE;
   }
 }

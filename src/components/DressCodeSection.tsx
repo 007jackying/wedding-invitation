@@ -25,7 +25,7 @@ function DressRow({ photoUrl, photoAlt, photoCaption, title, desc, bullets, reve
         transition={{ duration: 1, ease: "easeOut" }}
         className={`md:col-span-5 ${reverse ? "md:order-2" : ""}`}
       >
-        <div className="overflow-hidden aspect-[3/4] bg-brand-blush">
+        <div className="overflow-hidden rounded-2xl aspect-[3/4] bg-brand-blush">
           <img
             src={photoUrl}
             alt={photoAlt}

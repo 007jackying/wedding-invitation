@@ -10,8 +10,7 @@ export default function AudioPlayer({ lang }: AudioPlayerProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Classic wedding instrumental track: Claude Debussy's Clair de Lune
-  const audioUrl = "https://upload.wikimedia.org/wikipedia/commons/b/b2/Debussy_Clair_de_Lune.mp3";
+  const audioUrl = "/music.mp3";
 
   // Handle audio state transitions
   useEffect(() => {

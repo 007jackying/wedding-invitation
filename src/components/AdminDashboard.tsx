@@ -23,66 +23,21 @@ import {
   ArrowDown
 } from "lucide-react";
 import { ADMIN_PIN, RSVPFormData, TimelineItem } from "../types";
-import { 
-  getRSVPs, 
-  seedRSVPsIfEmpty, 
-  updateRSVP, 
-  deleteRSVP, 
+import {
+  addRSVP,
+  updateRSVP,
+  deleteRSVP,
   clearAllRSVPs,
-  onRSVPsSnapshot, 
-  onTimelineSnapshot, 
-  seedTimelineIfEmpty, 
-  updateTimelineItem, 
-  deleteTimelineItem, 
-  addTimelineItem 
+  onRSVPsSnapshot,
+  onTimelineSnapshot,
+  updateTimelineItem,
+  deleteTimelineItem,
+  addTimelineItem
 } from "../firebase";
 
 interface AdminDashboardProps {
   onBack: () => void;
 }
-
-// 4 Elegant seed guest RSVPs to make the dashboard look gorgeous out of the box
-const MOCK_GUESTS: RSVPFormData[] = [
-  {
-    id: "rsvp_mock1",
-    guestName: "Charlotte & Pierre Dubois",
-    guestCount: 2,
-    phone: "+33 6 1234 5678",
-    email: "charlotte.pierre@example.com",
-    dietChoice: "standard",
-    attending: true,
-    timestamp: "7/17/2026, 4:24:12 PM",
-  },
-  {
-    id: "rsvp_mock2",
-    guestName: "Alessandro Rossi",
-    guestCount: 1,
-    phone: "+39 333 987 6543",
-    email: "alessandro.r@example.it",
-    dietChoice: "vegetarian",
-    attending: true,
-    timestamp: "7/17/2026, 5:12:45 PM",
-  },
-  {
-    id: "rsvp_mock3",
-    guestName: "The Henderson Family",
-    guestCount: 4,
-    phone: "+1 (555) 019-2834",
-    email: "hendersons@example.com",
-    dietChoice: "standard",
-    attending: true,
-    timestamp: "7/18/2026, 1:05:30 AM",
-  },
-  {
-    id: "rsvp_mock4",
-    guestName: "Dr. Sofia Martinez",
-    guestCount: 1,
-    phone: "+34 600 123 456",
-    dietChoice: "vegetarian",
-    attending: true,
-    timestamp: "7/18/2026, 2:10:05 AM",
-  }
-];
 
 export default function AdminDashboard({ onBack }: AdminDashboardProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -91,6 +46,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
   const [showPin, setShowPin] = useState(false);
   
   const [submissions, setSubmissions] = useState<RSVPFormData[]>([]);
+  console.log(submissions);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showToast, setShowToast] = useState(false);
@@ -117,6 +73,14 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
   const [editEmail, setEditEmail] = useState("");
   const [editDiet, setEditDiet] = useState<"vegetarian" | "standard">("standard");
 
+  // For manually adding a new guest
+  const [isAddingGuest, setIsAddingGuest] = useState(false);
+  const [newGuestName, setNewGuestName] = useState("");
+  const [newGuestCount, setNewGuestCount] = useState<number>(1);
+  const [newGuestPhone, setNewGuestPhone] = useState("");
+  const [newGuestEmail, setNewGuestEmail] = useState("");
+  const [newGuestDiet, setNewGuestDiet] = useState<"vegetarian" | "standard">("standard");
+
   // Timeline state
   const [timelineList, setTimelineList] = useState<TimelineItem[]>([]);
   const [editingTimelineId, setEditingTimelineId] = useState<string | null>(null);
@@ -139,21 +103,16 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
   // 1. Load submissions from Firebase Firestore in real-time
   useEffect(() => {
     setIsLoading(true);
-    const initData = async () => {
-      try {
-        await seedRSVPsIfEmpty(MOCK_GUESTS);
-      } catch (err) {
-        console.warn("Could not seed RSVPs:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    initData();
+    // One-time cleanup of any previously-seeded mock guests still sitting in Firestore
+    Promise.all(
+      ["rsvp_mock1", "rsvp_mock2", "rsvp_mock3", "rsvp_mock4"].map((id) =>
+        deleteRSVP(id).catch(() => {})
+      )
+    ).finally(() => setIsLoading(false));
 
     // Setup real-time listener for RSVPs
     const unsubscribe = onRSVPsSnapshot((data) => {
       setSubmissions(data);
-      localStorage.setItem("wedding_rsvps", JSON.stringify(data));
     });
 
     return () => unsubscribe();
@@ -162,15 +121,6 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
   // 2. Load wedding timeline events in real-time
   useEffect(() => {
     if (!isAuthenticated) return;
-
-    const initTimeline = async () => {
-      try {
-        await seedTimelineIfEmpty();
-      } catch (err) {
-        console.warn("Could not seed timeline:", err);
-      }
-    };
-    initTimeline();
 
     // Setup real-time listener for Timeline items
     const unsubscribe = onTimelineSnapshot((items) => {
@@ -272,10 +222,46 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     });
 
     setSubmissions(updatedSubmissions);
-    localStorage.setItem("wedding_rsvps", JSON.stringify(updatedSubmissions));
     setEditingId(null);
     setIsLoading(false);
     triggerToast("RSVP response updated successfully");
+  };
+
+  const handleAddGuest = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newGuestName.trim()) {
+      alert("Guest name cannot be empty");
+      return;
+    }
+    if (newGuestCount < 1) {
+      alert("Party size must be at least 1");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await addRSVP({
+        guestName: newGuestName.trim(),
+        guestCount: Number(newGuestCount),
+        phone: newGuestPhone.trim(),
+        email: newGuestEmail.trim() || undefined,
+        dietChoice: newGuestDiet,
+        attending: true,
+        timestamp: new Date().toLocaleString(),
+      });
+      triggerToast("Guest added successfully!");
+      setNewGuestName("");
+      setNewGuestCount(1);
+      setNewGuestPhone("");
+      setNewGuestEmail("");
+      setNewGuestDiet("standard");
+      setIsAddingGuest(false);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to add guest.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSort = (field: "guestName" | "guestCount" | "phone" | "email" | "dietChoice" | "timestamp") => {
@@ -296,7 +282,6 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     }
     const updated = submissions.filter((sub) => sub.id !== id);
     setSubmissions(updated);
-    localStorage.setItem("wedding_rsvps", JSON.stringify(updated));
     setIsLoading(false);
     setDeleteId(null);
     setDeleteConfirmationText("");
@@ -393,7 +378,6 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     try {
       await clearAllRSVPs();
       setSubmissions([]);
-      localStorage.setItem("wedding_rsvps", JSON.stringify([]));
       triggerToast("All RSVP entries successfully cleared");
     } catch (err) {
       console.error("Failed to clear entries from Firestore:", err);
@@ -702,8 +686,116 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
 
             {/* Tab Content */}
             {activeTab === "guests" ? (
-              /* Search and List container */
-              <div className="bg-white border border-brand-rose/15 rounded-2xl shadow-sm overflow-hidden mb-12">
+              <div className="space-y-6 mb-12">
+              {/* Header or form trigger */}
+              <div className="flex items-center justify-end">
+                <button
+                  onClick={() => setIsAddingGuest(!isAddingGuest)}
+                  className="px-4 py-2.5 bg-brand-charcoal text-brand-cream hover:bg-brand-olive transition-colors rounded-xl text-xs font-semibold uppercase tracking-widest cursor-pointer shadow-sm"
+                >
+                  {isAddingGuest ? "Close Form" : "Add Guest Manually"}
+                </button>
+              </div>
+
+              {/* Add Guest Form */}
+              <AnimatePresence>
+                {isAddingGuest && (
+                  <motion.form
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    onSubmit={handleAddGuest}
+                    className="bg-white border border-brand-rose/20 rounded-2xl p-6 shadow-md space-y-4 overflow-hidden"
+                  >
+                    <h4 className="text-xs font-semibold tracking-wider text-brand-olive uppercase mb-2">
+                      New Guest Details
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-semibold text-brand-charcoal/70 mb-1">
+                          Guest Name
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={newGuestName}
+                          onChange={(e) => setNewGuestName(e.target.value)}
+                          placeholder="e.g., Jane Smith"
+                          className="w-full px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-brand-charcoal/70 mb-1">
+                          Party Size
+                        </label>
+                        <input
+                          type="number"
+                          required
+                          min={1}
+                          value={newGuestCount}
+                          onChange={(e) => setNewGuestCount(Number(e.target.value))}
+                          className="w-32 px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-brand-charcoal/70 mb-1">
+                          Phone Number
+                        </label>
+                        <input
+                          type="text"
+                          value={newGuestPhone}
+                          onChange={(e) => setNewGuestPhone(e.target.value)}
+                          placeholder="e.g., +1 (555) 019-2834"
+                          className="w-full px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-brand-charcoal/70 mb-1">
+                          Email (Optional)
+                        </label>
+                        <input
+                          type="email"
+                          value={newGuestEmail}
+                          onChange={(e) => setNewGuestEmail(e.target.value)}
+                          placeholder="e.g., jane@example.com"
+                          className="w-full px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold text-brand-charcoal/70 mb-1">
+                          Dietary Preference
+                        </label>
+                        <select
+                          value={newGuestDiet}
+                          onChange={(e) => setNewGuestDiet(e.target.value as "standard" | "vegetarian")}
+                          className="px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5 cursor-pointer"
+                        >
+                          <option value="standard">Standard Meal 🥩</option>
+                          <option value="vegetarian">Vegetarian 🌱</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingGuest(false)}
+                        className="px-4 py-2 border border-brand-rose/20 text-brand-charcoal hover:bg-gray-50 transition-colors rounded-xl text-xs font-semibold tracking-wider uppercase cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-5 py-2 bg-brand-charcoal text-white hover:bg-brand-rose transition-colors rounded-xl text-xs font-semibold tracking-wider uppercase cursor-pointer"
+                      >
+                        Save Guest
+                      </button>
+                    </div>
+                  </motion.form>
+                )}
+              </AnimatePresence>
+
+              {/* Search and List container */}
+              <div className="bg-white border border-brand-rose/15 rounded-2xl shadow-sm overflow-hidden">
               <div className="p-5 border-b border-brand-rose/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <h4 className="text-lg font-serif text-brand-charcoal font-medium">
                   Attending Guest Register
@@ -890,6 +982,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                   </table>
                 </div>
               )}
+            </div>
             </div>
           ) : (
             <div className="space-y-6 mb-12">

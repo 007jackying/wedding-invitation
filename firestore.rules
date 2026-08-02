@@ -2,10 +2,32 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /rsvps/{document} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create, update: if isValidRSVP(request.resource.data);
+      allow delete: if true;
     }
     match /timeline/{document} {
-      allow read, write: if true;
+      allow read: if true;
+      allow create, update: if isValidTimelineItem(request.resource.data);
+      allow delete: if true;
+    }
+
+    function isValidRSVP(data) {
+      return data.guestName is string && data.guestName.size() > 0 && data.guestName.size() < 200
+        && data.guestCount is number && data.guestCount >= 0 && data.guestCount <= 20
+        && data.phone is string && data.phone.size() < 50
+        && data.email is string && data.email.size() < 200
+        && data.dietChoice in ['standard', 'vegetarian']
+        && data.attending is bool
+        && data.timestamp is string;
+    }
+
+    function isValidTimelineItem(data) {
+      return data.timeEn is string && data.timeEn.size() < 100
+        && data.textEn is string && data.textEn.size() < 500
+        && data.timeCn is string && data.timeCn.size() < 100
+        && data.textCn is string && data.textCn.size() < 500
+        && data.order is number;
     }
   }
 }

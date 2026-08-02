@@ -80,20 +80,7 @@ export default function App() {
   };
 
   const handleRSVPSuccess = (data: RSVPFormData) => {
-    // 1. Persist response in local list so owner dashboard shows it instantly
-    try {
-      const stored = localStorage.getItem("wedding_rsvps");
-      const currentList: RSVPFormData[] = stored ? JSON.parse(stored) : [];
-      
-      // Store submission with the active language tag
-      const enrichedData = { ...data, lang };
-      const updatedList = [enrichedData, ...currentList];
-      localStorage.setItem("wedding_rsvps", JSON.stringify(updatedList));
-    } catch (e) {
-      console.warn("Failed to save RSVP locally:", e);
-    }
-
-    // 2. Set success data to display custom toast notification
+    // Set success data to display custom toast notification
     setSuccessData(data);
     setIsModalOpen(false);
     setShowToast(true);

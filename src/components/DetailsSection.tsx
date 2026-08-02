@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { X, ChevronLeft, ChevronRight, Users, HeartHandshake, UtensilsCrossed, PartyPopper } from "lucide-react";
 import { translations } from "../translations";
 import CalendarButton from "./CalendarButton";
-import { onTimelineSnapshot, seedTimelineIfEmpty } from "../firebase";
+import { onTimelineSnapshot } from "../firebase";
 import { TimelineItem } from "../types";
 
 // ponytail: cycled by index rather than matched to each label's meaning — holds up for any timeline length
@@ -59,15 +59,10 @@ export default function DetailsSection({ onAttendClick, lang }: DetailsSectionPr
   }, []);
 
   useEffect(() => {
-    // Realtime sync for timeline items
+    // Realtime sync for timeline items — falls back to the static translations
+    // below when Firestore has no schedule set yet (see `programmaRows`)
     const unsubscribe = onTimelineSnapshot((items) => {
-      if (items.length > 0) {
-        setTimelineItems(items);
-      } else {
-        seedTimelineIfEmpty().then((seeded) => {
-          setTimelineItems(seeded);
-        });
-      }
+      setTimelineItems(items);
     });
 
     return () => unsubscribe();
@@ -211,10 +206,10 @@ export default function DetailsSection({ onAttendClick, lang }: DetailsSectionPr
         >
           <button
             onClick={() => setIsLandscapeOpen(true)}
-            className="block w-full cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-brand-rose focus:ring-offset-4 focus:ring-offset-brand-cream"
+            className="block w-full rounded-2xl cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-rose focus:ring-offset-4 focus:ring-offset-brand-cream"
             aria-label={photoTitle}
           >
-            <div className="relative overflow-hidden aspect-[16/10] sm:aspect-[21/9] bg-brand-blush">
+            <div className="relative overflow-hidden rounded-2xl aspect-[16/10] sm:aspect-[21/9] bg-brand-blush">
               <AnimatePresence mode="popLayout">
                 <motion.img
                   key={photoIndex}
@@ -253,7 +248,7 @@ export default function DetailsSection({ onAttendClick, lang }: DetailsSectionPr
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 1 }}
-          className="bg-brand-charcoal text-brand-cream px-8 py-14 sm:px-14 sm:py-16 text-center"
+          className="bg-brand-charcoal text-brand-cream px-8 py-14 sm:px-14 sm:py-16 text-center rounded-3xl"
         >
           <p className="font-serif italic font-light text-2xl sm:text-3xl leading-snug max-w-xl mx-auto">
             {t.byDate}
@@ -287,7 +282,7 @@ export default function DetailsSection({ onAttendClick, lang }: DetailsSectionPr
                 <X className="w-6 h-6" />
               </button>
 
-              <div className="relative overflow-hidden aspect-[16/10] bg-black">
+              <div className="relative overflow-hidden rounded-2xl bg-black flex items-center justify-center max-h-[85vh]">
                 <AnimatePresence mode="popLayout">
                   <motion.img
                     key={photoIndex}
@@ -297,7 +292,7 @@ export default function DetailsSection({ onAttendClick, lang }: DetailsSectionPr
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.5, ease: "easeInOut" }}
-                    className="absolute inset-0 w-full h-full object-cover"
+                    className="w-full max-h-[85vh] object-contain"
                     referrerPolicy="no-referrer"
                   />
                 </AnimatePresence>
