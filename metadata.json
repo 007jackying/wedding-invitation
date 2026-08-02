@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Digital Wedding Invitation",
+  "description": "An elegant and responsive digital wedding invitation web app for Eva and Vincent with RSVP capabilities.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
