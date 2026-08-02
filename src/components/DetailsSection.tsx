@@ -4,7 +4,8 @@ import { X, ChevronLeft, ChevronRight, Users, HeartHandshake, UtensilsCrossed, P
 import { translations } from "../translations";
 import CalendarButton from "./CalendarButton";
 import { onTimelineSnapshot } from "../firebase";
-import { TimelineItem } from "../types";
+import { TimelineItem, RSVPFormData } from "../types";
+import RSVPSummary from "./RSVPSummary";
 
 // ponytail: cycled by index rather than matched to each label's meaning — holds up for any timeline length
 const TIMELINE_ICONS = [Users, HeartHandshake, UtensilsCrossed, PartyPopper];
@@ -43,9 +44,10 @@ const CAROUSEL_PHOTOS = [
 interface DetailsSectionProps {
   onAttendClick: () => void;
   lang: "en" | "cn";
+  myRSVP: RSVPFormData | null;
 }
 
-export default function DetailsSection({ onAttendClick, lang }: DetailsSectionProps) {
+export default function DetailsSection({ onAttendClick, lang, myRSVP }: DetailsSectionProps) {
   const t = translations[lang].details;
   const [timelineItems, setTimelineItems] = useState<TimelineItem[]>([]);
   const [isLandscapeOpen, setIsLandscapeOpen] = useState(false);
@@ -105,7 +107,7 @@ export default function DetailsSection({ onAttendClick, lang }: DetailsSectionPr
           <h2 className="font-serif italic font-light text-5xl sm:text-6xl text-brand-charcoal mt-4">
             {t.title}
           </h2>
-          <div className="w-16 h-px bg-brand-rose mt-8" />
+          <div className="w-16 h-px bg-brand-gold mt-8" />
         </div>
 
         {/* Programma / Venue spread */}
@@ -253,13 +255,19 @@ export default function DetailsSection({ onAttendClick, lang }: DetailsSectionPr
           <p className="font-serif italic font-light text-2xl sm:text-3xl leading-snug max-w-xl mx-auto">
             {t.byDate}
           </p>
-          <button
-            id="attend-rsvp-trigger"
-            onClick={onAttendClick}
-            className="mt-8 px-10 py-4 bg-brand-rose text-brand-cream hover:bg-brand-cream hover:text-brand-charcoal transition-colors duration-300 font-sans font-semibold text-xs tracking-[0.25em] uppercase cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-brand-cream focus:ring-offset-2 focus:ring-offset-brand-charcoal"
-          >
-            {t.attendBtn}
-          </button>
+          {myRSVP ? (
+            <div className="mt-8 flex justify-center">
+              <RSVPSummary rsvp={myRSVP} lang={lang} />
+            </div>
+          ) : (
+            <button
+              id="attend-rsvp-trigger"
+              onClick={onAttendClick}
+              className="mt-8 px-10 py-4 bg-brand-accent text-brand-cream hover:bg-brand-cream hover:text-brand-charcoal transition-colors duration-300 font-sans font-semibold text-xs tracking-[0.25em] uppercase cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-brand-cream focus:ring-offset-2 focus:ring-offset-brand-charcoal"
+            >
+              {t.attendBtn}
+            </button>
+          )}
         </motion.div>
       </motion.div>
 

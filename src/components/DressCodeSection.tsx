@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { Flower, Crown, LucideIcon } from "lucide-react";
 import { translations } from "../translations";
 
 interface DressCodeSectionProps {
@@ -9,13 +10,14 @@ interface DressRowProps {
   photoUrl: string;
   photoAlt: string;
   photoCaption: string;
+  icon: LucideIcon;
   title: string;
   desc: string;
   bullets: string[];
   reverse?: boolean;
 }
 
-function DressRow({ photoUrl, photoAlt, photoCaption, title, desc, bullets, reverse }: DressRowProps) {
+function DressRow({ photoUrl, photoAlt, photoCaption, icon: Icon, title, desc, bullets, reverse }: DressRowProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-14 items-center">
       <motion.figure
@@ -46,7 +48,8 @@ function DressRow({ photoUrl, photoAlt, photoCaption, title, desc, bullets, reve
         transition={{ duration: 1, delay: 0.15, ease: "easeOut" }}
         className={`md:col-span-7 ${reverse ? "md:order-1" : ""}`}
       >
-        <h3 className="font-serif italic font-light text-3xl sm:text-4xl text-brand-charcoal mb-5">
+        <h3 className="flex items-center gap-3 font-serif italic font-light text-3xl sm:text-4xl text-brand-charcoal mb-5">
+          <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-brand-rose shrink-0" strokeWidth={1.25} aria-hidden="true" />
           {title}
         </h3>
         <p className="font-sans text-sm sm:text-base font-light text-brand-charcoal/90 leading-relaxed max-w-lg">
@@ -88,7 +91,7 @@ export default function DressCodeSection({ lang }: DressCodeSectionProps) {
           <h2 className="font-serif italic font-light text-5xl sm:text-6xl text-brand-charcoal mt-4">
             {t.title}
           </h2>
-          <div className="w-16 h-px bg-brand-rose mt-8" />
+          <div className="w-16 h-px bg-brand-gold mt-8" />
           <p className="font-serif italic text-base sm:text-lg text-brand-olive mt-8 max-w-md leading-relaxed">
             {t.subtitle}
           </p>
@@ -99,6 +102,7 @@ export default function DressCodeSection({ lang }: DressCodeSectionProps) {
             photoUrl="https://images.unsplash.com/photo-1591555200813-b5537524440b?q=80&w=1000&auto=format&fit=crop"
             photoAlt="Bride dress inspiration"
             photoCaption={lang === "cn" ? "灵感 — 象牙白与淡雅色系" : "Inspiration — elegance in ivory & pastels"}
+            icon={Flower}
             title={t.ladies.title}
             desc={t.ladies.desc}
             bullets={[t.ladies.bullet1, t.ladies.bullet2, t.ladies.bullet3]}
@@ -108,6 +112,7 @@ export default function DressCodeSection({ lang }: DressCodeSectionProps) {
             photoUrl="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1000&auto=format&fit=crop"
             photoAlt="Groom suit inspiration"
             photoCaption={lang === "cn" ? "灵感 — 经典礼服与定制西装" : "Inspiration — tuxedos & classic suits"}
+            icon={Crown}
             title={t.gentlemen.title}
             desc={t.gentlemen.desc}
             bullets={[t.gentlemen.bullet1, t.gentlemen.bullet2, t.gentlemen.bullet3]}

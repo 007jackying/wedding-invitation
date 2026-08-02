@@ -15,6 +15,14 @@ export const GOOGLE_FORM_CONFIG = {
   }
 };
 
+// Couple's WhatsApp contacts, shown to guests who need to change their reply.
+// International format, digits only, no leading "+". Used to build wa.me links.
+// TODO: replace both placeholders with the real numbers before sharing the link.
+export const CONTACTS = [
+  { name: "Eva", whatsapp: "60178688037" },
+  { name: "Vincent", whatsapp: "60176384027" },
+];
+
 export const ADMIN_PIN = "123456"; // Default secure 6-digit pin to view guestlist
 
 export interface RSVPFormData {

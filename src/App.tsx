@@ -1,21 +1,23 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Check, Heart, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import HeroSection from "./components/HeroSection";
 import DetailsSection from "./components/DetailsSection";
 import DressCodeSection from "./components/DressCodeSection";
 import RSVPModal from "./components/RSVPModal";
 import AdminDashboard from "./components/AdminDashboard";
 import AudioPlayer from "./components/AudioPlayer";
+import ThankYouModal from "./components/ThankYouModal";
 import { RSVPFormData } from "./types";
 import { translations } from "./translations";
+import { readMyRSVP, saveMyRSVP } from "./rsvpStorage";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<"invitation" | "admin">("invitation");
   const [lang, setLang] = useState<"en" | "cn">("en");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [successData, setSuccessData] = useState<RSVPFormData | null>(null);
-  const [showToast, setShowToast] = useState(false);
+  // This device's own reply, so a returning guest sees their answer, not a form
+  const [myRSVP, setMyRSVP] = useState<RSVPFormData | null>(() => readMyRSVP());
 
   // Hash/Path routing to switch between English/Chinese view & Admin dashboard
   useEffect(() => {
@@ -80,23 +82,17 @@ export default function App() {
   };
 
   const handleRSVPSuccess = (data: RSVPFormData) => {
-    // Set success data to display custom toast notification
     setSuccessData(data);
+    saveMyRSVP(data);
+    setMyRSVP(data);
     setIsModalOpen(false);
-    setShowToast(true);
+  };
 
-    // Auto-hide toast after 8 seconds
-    setTimeout(() => {
-      setShowToast(false);
-    }, 8000);
-
-    // 3. Smoothly scroll to Dress Code section
-    setTimeout(() => {
-      const dressCodeSec = document.getElementById("dress-code");
-      if (dressCodeSec) {
-        dressCodeSec.scrollIntoView({ behavior: "smooth" });
-      }
-    }, 400);
+  const handleCloseThankYou = () => {
+    setSuccessData(null);
+    // Land them on the dress code once the note is dismissed, rather than
+    // scrolling the page behind an open dialog.
+    document.getElementById("dress-code")?.scrollIntoView({ behavior: "smooth" });
   };
 
   const navigateToAdmin = () => {
@@ -117,7 +113,7 @@ export default function App() {
   return (
     <div
       data-lang={lang}
-      className="relative min-h-screen bg-brand-cream text-brand-charcoal overflow-x-hidden select-none font-sans antialiased"
+      className="relative min-h-screen bg-brand-cream text-brand-charcoal overflow-x-hidden font-sans antialiased"
       style={lang === "cn" ? ({ ["--font-serif" as string]: "var(--font-serif-cn)" }) : undefined}
     >
       {/* Subtle floating background audio player */}
@@ -129,7 +125,7 @@ export default function App() {
       </div>
 
       {/* Premium Floating Language Switcher Capsule */}
-      <div className="fixed top-6 right-6 z-40">
+      <div className="fixed top-10 right-5 sm:top-16 sm:right-10 z-40">
         <div className="flex items-center gap-1.5 bg-white border border-brand-rose/10 rounded-full px-1.5 py-1 shadow-xs hover:shadow-md transition-all">
           <button
             onClick={() => {
@@ -161,10 +157,14 @@ export default function App() {
       {/* Full-Height Sections */}
       <main>
         {/* 1. Landing Hero Section */}
-        <HeroSection lang={lang} />
+        <HeroSection
+          lang={lang}
+          myRSVP={myRSVP}
+          onAttendClick={handleOpenModal}
+        />
 
         {/* 2. Details & RSVP Section */}
-        <DetailsSection onAttendClick={handleOpenModal} lang={lang} />
+        <DetailsSection onAttendClick={handleOpenModal} lang={lang} myRSVP={myRSVP} />
 
         {/* 3. Dress Code Section */}
         <DressCodeSection lang={lang} />
@@ -200,62 +200,9 @@ export default function App() {
         lang={lang}
       />
 
-      {/* Elegant RSVP Success Toast Notification */}
-      <AnimatePresence>
-        {showToast && successData && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.9 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.9 }}
-            className="fixed bottom-6 right-6 left-6 sm:left-auto sm:max-w-md z-50 bg-white border border-brand-rose/20 rounded-2xl p-4 shadow-xl flex gap-3.5 items-start"
-            id="rsvp-success-toast"
-          >
-            {/* Visual Checkmark Badge */}
-            <div className="bg-brand-olive/10 text-brand-olive p-2 rounded-xl shrink-0 mt-0.5">
-              <Check className="w-5 h-5 stroke-[2.5]" />
-            </div>
+      {/* Thank-you note shown once the reply is safely saved */}
+      <ThankYouModal data={successData} lang={lang} onClose={handleCloseThankYou} />
 
-            {/* Content text */}
-            <div className="flex-1 min-w-0">
-              <h4 className="text-sm font-semibold text-brand-charcoal tracking-wide">
-                {t.toast.title}
-              </h4>
-              
-              {!successData.attending ? (
-                <p className="text-xs text-brand-charcoal/70 leading-relaxed mt-1">
-                  {lang === "cn" ? (
-                    <>{t.toast.thankYou}，<span className="font-semibold text-brand-accent">{successData.guestName}</span>。很遗憾这次无法相聚，期待日后与您相见。</>
-                  ) : (
-                    <>{t.toast.thankYou}, <span className="font-semibold text-brand-accent">{successData.guestName}</span>. We're sorry you can't make it — we'll miss you and hope to celebrate together soon.</>
-                  )}
-                </p>
-              ) : lang === "cn" ? (
-                <p className="text-xs text-brand-charcoal/70 leading-relaxed mt-1">
-                  {t.toast.thankYou}，<span className="font-semibold text-brand-accent">{successData.guestName}</span>！您的 {successData.guestCount} {t.toast.people} 出席答复已成功记入来宾名单。
-                </p>
-              ) : (
-                <p className="text-xs text-brand-charcoal/70 leading-relaxed mt-1">
-                  {t.toast.thankYou}, <span className="font-semibold text-brand-accent">{successData.guestName}</span>! {t.toast.registered} <span className="font-semibold">{successData.guestCount} {successData.guestCount === 1 ? t.toast.person : t.toast.people}</span> has been registered in our guest list.
-                </p>
-              )}
-
-              <div className="flex items-center gap-1.5 mt-2.5 text-[10px] text-brand-olive tracking-wider uppercase font-medium">
-                <Heart className="w-3 h-3 fill-current text-brand-rose animate-pulse" />
-                <span>{t.toast.footer}</span>
-              </div>
-            </div>
-
-            {/* Close Button */}
-            <button
-              onClick={() => setShowToast(false)}
-              className="text-brand-charcoal/30 hover:text-brand-charcoal/70 transition-colors self-start p-1"
-              aria-label="Close toast notification"
-            >
-              &times;
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

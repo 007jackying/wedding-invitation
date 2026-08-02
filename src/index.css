@@ -9,14 +9,16 @@
   /* Brush-script couple name treatment, matches the "We got Married" style reference */
   --font-script: "Alex Brush", cursive;
 
-  /* Tuscan dusk palette — plaster, cypress, chianti.
-     Legacy token names kept so every component recolors from here. */
-  --color-brand-cream: #F0EDE4;   /* plaster: page background */
-  --color-brand-blush: #E4DECE;   /* linen: soft fills */
-  --color-brand-rose: #7D2F35;    /* chianti: accent for rules, icons, highlights */
-  --color-brand-accent: #6E2A30;  /* deep chianti: text-safe links & labels (≈7:1 on plaster) */
-  --color-brand-charcoal: #2A3123;/* cypress ink: primary text & dark surfaces */
-  --color-brand-olive: #59604A;   /* moss: secondary text */
+  /* "Tuscan Dream" palette — warm sand canvas, muted olive, rose/blush gold.
+     Gold is a decorative metallic and never carries body copy; the contrast
+     floor is met by --accent (text) and --charcoal/--olive (everything else). */
+  --color-brand-cream: #FDF8E1;   /* warm sand: page background */
+  --color-brand-blush: #FDF4CB;   /* deeper sand: soft fills */
+  --color-brand-gold: #C2A05C;    /* blush gold: frames, corners, rules, stardust (decorative only, 2.3:1) */
+  --color-brand-rose: #B5776F;    /* rose gold: icons & highlights (3.4:1 — non-text / large only) */
+  --color-brand-accent: #8A4A45;  /* deep rose: text-safe links, labels & solid buttons (6.3:1 on sand) */
+  --color-brand-charcoal: #2A3123;/* cypress ink: primary text & dark surfaces (12.6:1) */
+  --color-brand-olive: #59604A;   /* moss: secondary text (6.1:1) */
 }
 
 html {
@@ -30,14 +32,14 @@ html {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F0EDE4;
+  background: var(--color-brand-cream);
 }
 ::-webkit-scrollbar-thumb {
-  background: #C9C2AE;
+  background: #E0D4A8;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #7D2F35;
+  background: var(--color-brand-gold);
 }
 
 /* High-contrast text shadows for readability over image backgrounds */
@@ -55,6 +57,21 @@ html {
 
 .text-shadow-strong {
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Summer-breeze stardust drifting over the hero. Each mote gets its own
+   distance, duration and delay from inline custom properties. */
+@keyframes stardust-drift {
+  0%, 100% { transform: translate3d(0, 0, 0); opacity: 0.2; }
+  50%      { transform: translate3d(var(--dx), var(--dy), 0); opacity: 0.85; }
+}
+
+.stardust-mote {
+  position: absolute;
+  border-radius: 9999px;
+  background: var(--color-brand-gold);
+  animation: stardust-drift var(--dur) ease-in-out infinite;
+  animation-delay: var(--delay);
 }
 
 /* CJK has no true italics — fake-oblique Chinese reads as a rendering bug, so keep it upright */

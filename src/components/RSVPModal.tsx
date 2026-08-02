@@ -67,47 +67,9 @@ export default function RSVPModal({ isOpen, onClose, onSubmitSuccess, lang }: RS
         console.warn("Google Form submission failed:", gfErr);
       }
 
-      // Save to Firebase Firestore database
-      let submittedData: RSVPFormData;
-      try {
-        submittedData = await addRSVP({
-          guestName: guestName.trim(),
-          guestCount: Number(guestCount),
-          phone: phone.trim(),
-          email: email.trim() || undefined,
-          dietChoice,
-          attending,
-          timestamp: new Date().toLocaleString(),
-        });
-      } catch (fbErr) {
-        console.warn("Firestore save failed, falling back to local object:", fbErr);
-        submittedData = {
-          id: "rsvp_" + Math.random().toString(36).substring(2, 11),
-          guestName: guestName.trim(),
-          guestCount: Number(guestCount),
-          phone: phone.trim(),
-          email: email.trim() || undefined,
-          dietChoice,
-          attending,
-          timestamp: new Date().toLocaleString(),
-        };
-      }
-
-      // Reset fields
-      setGuestName("");
-      setGuestCount("");
-      setPhone("");
-      setEmail("");
-      setDietChoice("standard");
-      setAttending(true);
-      
-      // Close modal & trigger success sequence
-      onSubmitSuccess(submittedData);
-    } catch (err) {
-      console.warn("Submission error:", err);
-      // Fallback to local success logging for seamless offline-first experience
-      onSubmitSuccess({
-        id: "rsvp_" + Math.random().toString(36).substring(2, 11),
+      // Save to Firebase Firestore — this is the record that counts, so a
+      // failure here has to reach the guest rather than be swallowed.
+      const submittedData: RSVPFormData = await addRSVP({
         guestName: guestName.trim(),
         guestCount: Number(guestCount),
         phone: phone.trim(),
@@ -116,6 +78,24 @@ export default function RSVPModal({ isOpen, onClose, onSubmitSuccess, lang }: RS
         attending,
         timestamp: new Date().toLocaleString(),
       });
+
+      // Reset fields
+      setGuestName("");
+      setGuestCount("");
+      setPhone("");
+      setEmail("");
+      setDietChoice("standard");
+      setAttending(true);
+
+      // Close modal & trigger success sequence
+      onSubmitSuccess(submittedData);
+    } catch (err) {
+      console.error("RSVP save failed:", err);
+      setError(
+        lang === "cn"
+          ? "答复未能送出。请检查网络后重新提交，或直接与我们联系。"
+          : "Your reply didn't send. Check your connection and submit again, or message us directly."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -145,7 +125,7 @@ export default function RSVPModal({ isOpen, onClose, onSubmitSuccess, lang }: RS
             className="relative w-full max-w-lg bg-brand-cream border border-brand-rose/20 rounded-2xl p-6 sm:p-8 shadow-2xl z-10 overflow-hidden"
           >
             {/* Top decorative accent */}
-            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-brand-blush via-brand-rose to-brand-olive" />
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-brand-gold via-brand-rose to-brand-olive" />
 
             {/* Close Button */}
             <button

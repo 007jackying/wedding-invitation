@@ -19,6 +19,7 @@ import {
   Save,
   X,
   ArrowUpDown,
+  AlertTriangle,
   ArrowUp,
   ArrowDown
 } from "lucide-react";
@@ -46,7 +47,6 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
   const [showPin, setShowPin] = useState(false);
   
   const [submissions, setSubmissions] = useState<RSVPFormData[]>([]);
-  console.log(submissions);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [showToast, setShowToast] = useState(false);
@@ -224,7 +224,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     setSubmissions(updatedSubmissions);
     setEditingId(null);
     setIsLoading(false);
-    triggerToast("RSVP response updated successfully");
+    triggerToast("Reply updated");
   };
 
   const handleAddGuest = async (e: React.FormEvent) => {
@@ -420,6 +420,28 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     triggerToast("Guestlist CSV file downloaded successfully!");
   };
 
+  // Flags rows sharing a name or phone with another row. The guest-facing form
+  // can't edit a reply, so a repeat submission lands as a second document —
+  // this is how the couple spots one. Heuristic, not authoritative.
+  const duplicateIds = useMemo(() => {
+    const byName = new Map<string, string[]>();
+    const byPhone = new Map<string, string[]>();
+
+    submissions.forEach((sub) => {
+      const name = sub.guestName.trim().toLowerCase();
+      if (name) byName.set(name, [...(byName.get(name) ?? []), sub.id]);
+
+      const phone = sub.phone.replace(/\D/g, "");
+      if (phone) byPhone.set(phone, [...(byPhone.get(phone) ?? []), sub.id]);
+    });
+
+    const flagged = new Set<string>();
+    [...byName.values(), ...byPhone.values()].forEach((ids) => {
+      if (ids.length > 1) ids.forEach((id) => flagged.add(id));
+    });
+    return flagged;
+  }, [submissions]);
+
   const sortedSubmissions = useMemo(() => {
     const filtered = submissions.filter((sub) =>
       sub.guestName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -460,6 +482,12 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     .filter((sub) => sub.dietChoice === "vegetarian")
     .reduce((sum, item) => sum + item.guestCount, 0);
   const standardCount = totalGuests - vegetarianCount;
+  // Docs written before the `attending` field existed are counted as joining.
+  const acceptedCount = submissions.filter((sub) => sub.attending !== false).length;
+  const declinedCount = totalResponses - acceptedCount;
+  const acceptanceRate = totalResponses
+    ? Math.round((acceptedCount / totalResponses) * 100)
+    : 0;
 
   const renderSortHeader = (
     label: string, 
@@ -487,7 +515,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F6F2] py-12 px-4 sm:px-6 lg:px-8 font-sans">
+    <div className="min-h-screen bg-brand-blush/50 py-12 px-4 sm:px-6 lg:px-8 font-sans">
       <AnimatePresence>
         {/* Simple 6-digit PIN Modal if not authenticated */}
         {!isAuthenticated ? (
@@ -581,7 +609,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
               <div>
                 <button
                   onClick={onBack}
-                  className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-rose hover:text-brand-charcoal transition-colors mb-3 cursor-pointer"
+                  className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-brand-accent hover:text-brand-charcoal transition-colors mb-3 cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />
                   Return to Wedding Invitation
@@ -643,19 +671,29 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                   <p className="text-[11px] text-brand-charcoal/60 mt-1">
                     🌱 {vegetarianCount} Veg • 🥩 {standardCount} Standard
                   </p>
+                  {duplicateIds.size > 0 && (
+                    <p className="mt-1.5 inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700">
+                      <AlertTriangle className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                      {duplicateIds.size} possible duplicate
+                      {duplicateIds.size === 1 ? "" : "s"} — headcount may be too high
+                    </p>
+                  )}
                 </div>
               </div>
 
-              {/* Stat card 3: Venue limit / status */}
+              {/* Stat card 3: Acceptance rate */}
               <div className="bg-white border border-brand-rose/15 rounded-2xl p-6 shadow-xs flex items-center gap-4">
-                <div className="p-3.5 bg-yellow-50 text-yellow-600 rounded-xl shrink-0">
+                <div className="p-3.5 bg-brand-gold/15 text-brand-accent rounded-xl shrink-0">
                   <Sparkles className="w-6 h-6 stroke-[1.5]" />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-yellow-700">Accepting RSVPs</p>
-                  <h3 className="text-2xl sm:text-3xl font-serif font-semibold text-brand-charcoal mt-1">
-                    Yes
+                  <p className="text-xs font-semibold uppercase tracking-wider text-brand-olive">Accepted</p>
+                  <h3 className="text-2xl sm:text-3xl font-serif font-semibold text-brand-charcoal mt-1 tabular-nums">
+                    {acceptanceRate}%
                   </h3>
+                  <p className="text-[11px] text-brand-charcoal/60 mt-1 tabular-nums">
+                    {acceptedCount} joining • {declinedCount} declined
+                  </p>
                 </div>
               </div>
             </div>
@@ -721,7 +759,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                           value={newGuestName}
                           onChange={(e) => setNewGuestName(e.target.value)}
                           placeholder="e.g., Jane Smith"
-                          className="w-full px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                          className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
                         />
                       </div>
                       <div>
@@ -734,7 +772,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                           min={1}
                           value={newGuestCount}
                           onChange={(e) => setNewGuestCount(Number(e.target.value))}
-                          className="w-32 px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                          className="w-32 px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
                         />
                       </div>
                       <div>
@@ -746,7 +784,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                           value={newGuestPhone}
                           onChange={(e) => setNewGuestPhone(e.target.value)}
                           placeholder="e.g., +1 (555) 019-2834"
-                          className="w-full px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                          className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
                         />
                       </div>
                       <div>
@@ -758,7 +796,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                           value={newGuestEmail}
                           onChange={(e) => setNewGuestEmail(e.target.value)}
                           placeholder="e.g., jane@example.com"
-                          className="w-full px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                          className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
                         />
                       </div>
                       <div>
@@ -768,7 +806,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                         <select
                           value={newGuestDiet}
                           onChange={(e) => setNewGuestDiet(e.target.value as "standard" | "vegetarian")}
-                          className="px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5 cursor-pointer"
+                          className="px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5 cursor-pointer"
                         >
                           <option value="standard">Standard Meal 🥩</option>
                           <option value="vegetarian">Vegetarian 🌱</option>
@@ -785,7 +823,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                       </button>
                       <button
                         type="submit"
-                        className="px-5 py-2 bg-brand-charcoal text-white hover:bg-brand-rose transition-colors rounded-xl text-xs font-semibold tracking-wider uppercase cursor-pointer"
+                        className="px-5 py-2 bg-brand-charcoal text-white hover:bg-brand-accent transition-colors rounded-xl text-xs font-semibold tracking-wider uppercase cursor-pointer"
                       >
                         Save Guest
                       </button>
@@ -809,7 +847,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                     placeholder="Search by name or contact..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2 bg-[#F8F6F2] border border-brand-rose/20 rounded-xl font-sans text-sm placeholder-brand-charcoal/40 text-brand-charcoal focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/10 transition-all"
+                    className="w-full pl-9 pr-4 py-2 bg-brand-blush/50 border border-brand-rose/20 rounded-xl font-sans text-sm placeholder-brand-charcoal/40 text-brand-charcoal focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/10 transition-all"
                   />
                 </div>
               </div>
@@ -821,13 +859,13 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                     <Search className="w-8 h-8" />
                   </div>
                   <p className="text-sm font-medium">No attending guests found matching your criteria</p>
-                  <p className="text-xs text-brand-charcoal/30 mt-1">Try resetting the search or submit new RSVPs on the page!</p>
+                  <p className="text-xs text-brand-charcoal/30 mt-1">Try resetting the search or submit new replies on the page!</p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto rounded-2xl border border-brand-rose/10">
                   <table className="w-full min-w-[700px] text-left border-collapse font-sans">
                     <thead>
-                      <tr className="bg-[#F8F6F2] text-xs font-semibold uppercase tracking-wider text-brand-olive border-b border-brand-rose/10">
+                      <tr className="bg-brand-blush/50 text-xs font-semibold uppercase tracking-wider text-brand-olive border-b border-brand-rose/10">
                         {renderSortHeader("Guest Name", "guestName")}
                         {renderSortHeader("Party Size", "guestCount", true)}
                         {renderSortHeader("Phone Number", "phone")}
@@ -915,7 +953,21 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                             ) : (
                               <>
                                 <td className="py-4 px-6 font-medium text-brand-charcoal">
-                                  {sub.guestName}
+                                  <span className="inline-flex items-center gap-1.5">
+                                    {duplicateIds.has(sub.id) && (
+                                      <AlertTriangle
+                                        className="w-4 h-4 text-amber-600 shrink-0"
+                                        aria-label="Possible duplicate reply"
+                                      >
+                                        <title>
+                                          Possible duplicate — another reply shares this name or
+                                          phone number. Check the submission times and delete the
+                                          older one.
+                                        </title>
+                                      </AlertTriangle>
+                                    )}
+                                    {sub.guestName}
+                                  </span>
                                 </td>
                                 <td className="py-4 px-6 text-center">
                                   <span className="inline-flex items-center justify-center bg-brand-blush/40 text-brand-rose font-semibold px-2.5 py-1 rounded-lg text-xs min-w-8">
@@ -1028,7 +1080,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                           value={newTimeEn}
                           onChange={(e) => setNewTimeEn(e.target.value)}
                           placeholder='e.g., "04:00 PM"'
-                          className="w-full px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                          className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
                         />
                       </div>
                       <div>
@@ -1041,7 +1093,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                           value={newTimeCn}
                           onChange={(e) => setNewTimeCn(e.target.value)}
                           placeholder='e.g., "下午 04:00"'
-                          className="w-full px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                          className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
                         />
                       </div>
                       <div>
@@ -1054,7 +1106,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                           value={newTxtEn}
                           onChange={(e) => setNewTxtEn(e.target.value)}
                           placeholder='e.g., "Welcoming & Drinks"'
-                          className="w-full px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                          className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
                         />
                       </div>
                       <div>
@@ -1067,7 +1119,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                           value={newTxtCn}
                           onChange={(e) => setNewTxtCn(e.target.value)}
                           placeholder='e.g., "宾客入场与迎宾饮品"'
-                          className="w-full px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                          className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
                         />
                       </div>
                       <div className="md:col-span-2">
@@ -1080,7 +1132,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                           min={1}
                           value={newOrder}
                           onChange={(e) => setNewOrder(Number(e.target.value))}
-                          className="w-32 px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                          className="w-32 px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
                         />
                       </div>
                     </div>
@@ -1094,7 +1146,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                       </button>
                       <button
                         type="submit"
-                        className="px-5 py-2 bg-brand-charcoal text-white hover:bg-brand-rose transition-colors rounded-xl text-xs font-semibold tracking-wider uppercase cursor-pointer"
+                        className="px-5 py-2 bg-brand-charcoal text-white hover:bg-brand-accent transition-colors rounded-xl text-xs font-semibold tracking-wider uppercase cursor-pointer"
                       >
                         Save Event
                       </button>
@@ -1105,10 +1157,10 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
 
               {/* Timeline Grid list */}
               <div className="bg-white border border-brand-rose/15 rounded-2xl shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto rounded-2xl border border-brand-rose/10">
                   <table className="w-full min-w-[700px] text-left border-collapse font-sans">
                     <thead>
-                      <tr className="bg-[#F8F6F2] text-xs font-semibold uppercase tracking-wider text-brand-olive border-b border-brand-rose/10">
+                      <tr className="bg-brand-blush/50 text-xs font-semibold uppercase tracking-wider text-brand-olive border-b border-brand-rose/10">
                         <th className="py-4 px-6 w-24 text-center">Order</th>
                         <th className="py-4 px-6">Time (EN)</th>
                         <th className="py-4 px-6">Time (CN)</th>
@@ -1276,7 +1328,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                 <label className="block text-xs font-semibold text-brand-charcoal/70">
                   To confirm deletion, please type the word exactly:
                 </label>
-                <div className="bg-[#F8F6F2] border border-brand-rose/15 rounded-lg py-2 px-3 text-center font-mono text-xs select-all text-brand-charcoal font-semibold tracking-wide">
+                <div className="bg-brand-blush/50 border border-brand-rose/15 rounded-lg py-2 px-3 text-center font-mono text-xs select-all text-brand-charcoal font-semibold tracking-wide">
                   delete
                 </div>
                 <input
@@ -1284,7 +1336,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                   value={deleteConfirmationText}
                   onChange={(e) => setDeleteConfirmationText(e.target.value)}
                   placeholder="Type 'delete'..."
-                  className="w-full px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                  className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
                 />
               </div>
 
@@ -1355,7 +1407,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                 <label className="block text-xs font-semibold text-brand-charcoal/70">
                   To confirm clearing all entries, please type the word exactly:
                 </label>
-                <div className="bg-[#F8F6F2] border border-brand-rose/15 rounded-lg py-2 px-3 text-center font-mono text-xs select-all text-brand-charcoal font-semibold tracking-wide">
+                <div className="bg-brand-blush/50 border border-brand-rose/15 rounded-lg py-2 px-3 text-center font-mono text-xs select-all text-brand-charcoal font-semibold tracking-wide">
                   delete
                 </div>
                 <input
@@ -1363,7 +1415,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
                   value={clearAllConfirmationText}
                   onChange={(e) => setClearAllConfirmationText(e.target.value)}
                   placeholder="Type 'delete'..."
-                  className="w-full px-3 py-2 bg-[#F8F6F2] border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
+                  className="w-full px-3 py-2 bg-brand-blush/50 border border-brand-rose/15 rounded-xl font-sans text-sm focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/5"
                 />
               </div>
 

@@ -64,13 +64,13 @@ export default function CountdownTimer({ lang }: CountdownTimerProps) {
   ];
 
   return (
-    <div className="flex items-baseline gap-4 sm:gap-5" role="timer" aria-label={t.datePlace}>
+    <div className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 sm:gap-x-5" role="timer" aria-label={t.datePlace}>
       {timeUnits.map((unit) => (
         <div key={unit.label} className="flex items-baseline gap-1.5">
-          <span className="font-serif text-xl sm:text-2xl text-brand-cream tabular-nums text-shadow-md">
+          <span className="font-serif text-xl sm:text-3xl text-brand-cream tabular-nums text-shadow-md">
             {String(unit.value).padStart(2, "0")}
           </span>
-          <span className="text-[9px] sm:text-[10px] font-sans font-semibold tracking-[0.2em] uppercase text-brand-cream/70 text-shadow-sm">
+          <span className="text-[9px] sm:text-xs font-sans font-semibold tracking-[0.2em] uppercase text-brand-cream/70 text-shadow-sm">
             {unit.label}
           </span>
         </div>

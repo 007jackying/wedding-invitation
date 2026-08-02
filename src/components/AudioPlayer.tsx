@@ -34,15 +34,17 @@ export default function AudioPlayer({ lang }: AudioPlayerProps) {
     en: {
       play: "Play Background Music",
       mute: "Mute Music",
+      nowPlaying: "Playing Blue Hour by Taisei Iwasaki",
     },
     cn: {
       play: "播放背景音乐",
       mute: "静音背景音乐",
+      nowPlaying: "正在播放 Blue Hour — 岩崎太整",
     }
   }[lang];
 
   return (
-    <div className="fixed top-6 left-6 z-50">
+    <div className="fixed top-10 left-5 sm:top-16 sm:left-10 z-50 flex items-center gap-2">
       {/* Hidden audio element */}
       <audio
         ref={audioRef}
@@ -77,10 +79,34 @@ export default function AudioPlayer({ lang }: AudioPlayerProps) {
 
         {isPlaying ? (
           <Volume2 className="w-4 h-4 animate-pulse" />
+
         ) : (
           <VolumeX className="w-4 h-4" />
         )}
       </motion.button>
+
+      {/* Scrolling now-playing marquee */}
+      <AnimatePresence>
+        {isPlaying && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-32 sm:w-44 overflow-hidden pointer-events-none"
+            aria-hidden="true"
+          >
+            <motion.div
+              className="flex w-max"
+              animate={{ x: ["0%", "-50%"] }}
+              transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
+            >
+              {/* ponytail: duplicated text is the whole marquee trick */}
+              <span className="pr-8 text-[10px] tracking-wide text-brand-cream text-shadow-md whitespace-nowrap">{labels.nowPlaying}</span>
+              <span className="pr-8 text-[10px] tracking-wide text-brand-cream text-shadow-md whitespace-nowrap">{labels.nowPlaying}</span>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -64,6 +64,17 @@ export interface TranslationSchema {
       bullet3: string;
     };
   };
+  rsvp: {
+    accept: string;
+    yourReply: string;
+    attending: string;
+    notAttending: string;
+    guest: string;
+    guests: string;
+    vegetarian: string;
+    standard: string;
+    change: string;
+  };
   modal: {
     title: string;
     subtitle: string;
@@ -85,6 +96,7 @@ export interface TranslationSchema {
     person: string;
     people: string;
     footer: string;
+    close: string;
   };
   footer: {
     copyright: string;
@@ -111,7 +123,7 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
       joinCelebration: "Join Our Celebration",
       title: "The Wedding Details",
       byDate: "Kindly respond by November 1, 2026",
-      attendBtn: "Attend & RSVP",
+      attendBtn: "Reply to the Invitation",
       calendar: {
         buttonText: "Add to Calendar",
         google: "Google Calendar",
@@ -160,9 +172,20 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
         bullet3: "• Classic tones such as charcoal, navy blue, or black suit best",
       },
     },
+    rsvp: {
+      accept: "Reply to the Invitation",
+      yourReply: "Your reply",
+      attending: "You're joining us",
+      notAttending: "You can't make it",
+      guest: "guest",
+      guests: "guests",
+      vegetarian: "Vegetarian",
+      standard: "Standard meal",
+      change: "Need to change something?",
+    },
     modal: {
-      title: "RSVP Confirmation",
-      subtitle: "Share your presence",
+      title: "Your Reply",
+      subtitle: "Let us know you're coming",
       fullName: "Full Name",
       phone: "Phone Number",
       guestCount: "Number of Guests",
@@ -171,16 +194,17 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
       dietChoice: "Dietary Preference",
       dietVegetarian: "Vegetarian 🌱",
       dietNonVegetarian: "Standard Meal",
-      submit: "Send RSVP",
-      submitting: "Sending Invitation...",
+      submit: "Send Reply",
+      submitting: "Sending your reply…",
     },
     toast: {
-      title: "RSVP Received!",
+      title: "Submitted!",
       thankYou: "Thank you",
       registered: "Your response for",
       person: "person",
       people: "people",
       footer: "We can't wait to see you!",
+      close: "Close",
     },
     footer: {
       copyright: "Eva & Vincent • January 2, 2027",
@@ -205,7 +229,7 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
       joinCelebration: "期待您的莅临",
       title: "婚礼详情",
       byDate: "请于 2026年11月1日前 回复答复",
-      attendBtn: "接受邀请并登记",
+      attendBtn: "回覆邀请",
       calendar: {
         buttonText: "添加到日历",
         google: "谷歌日历",
@@ -254,8 +278,19 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
         bullet3: "• 经典色调如炭黑、藏青或纯黑色系最为合宜",
       },
     },
+    rsvp: {
+      accept: "回覆邀请",
+      yourReply: "您的答复",
+      attending: "您将出席",
+      notAttending: "您无法出席",
+      guest: "位来宾",
+      guests: "位来宾",
+      vegetarian: "素食",
+      standard: "普通荤食",
+      change: "需要修改吗？",
+    },
     modal: {
-      title: "请帖答复登记",
+      title: "您的答复",
       subtitle: "期待您的光临",
       fullName: "真实姓名",
       phone: "联系电话",
@@ -266,15 +301,16 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
       dietVegetarian: "素食 🌱",
       dietNonVegetarian: "普通荤食",
       submit: "提交答复",
-      submitting: "正在登记...",
+      submitting: "正在送出…",
     },
     toast: {
-      title: "登记成功！",
+      title: "已送出！",
       thankYou: "感谢您",
       registered: "您登记的",
       person: "位来宾",
       people: "位来宾",
       footer: "我们热切期盼您的到来！",
+      close: "关闭",
     },
     footer: {
       copyright: "Eva & Vincent • 2027年1月2日",
