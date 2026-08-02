@@ -174,14 +174,14 @@ export default function DetailsSection({ onAttendClick, lang }: DetailsSectionPr
                 {t.cards.where.addressLabel}
               </h4>
               <p className="font-sans text-sm sm:text-base font-light text-brand-charcoal/90 leading-relaxed">
-                Via del Salviatino, 1,<br />
-                50137 Fiesole, Florence,<br />
-                Tuscany, Italy
+                20, Jalan Kampung, Imbi,<br />
+                55100 Kuala Lumpur,<br />
+                Wilayah Persekutuan Kuala Lumpur
               </p>
 
               <div className="mt-8 flex flex-col items-start gap-3">
                 <a
-                  href="https://maps.google.com/?q=Villa+di+Maiano+Florence+Italy"
+                  href="https://maps.google.com/?q=Chuai+Heng+Banquet+Hall+Kuala+Lumpur"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs font-sans font-semibold tracking-[0.2em] text-brand-accent hover:text-brand-charcoal uppercase transition-colors border-b border-brand-rose/40 pb-1"
@@ -189,7 +189,7 @@ export default function DetailsSection({ onAttendClick, lang }: DetailsSectionPr
                   {t.cards.where.mapLink}
                 </a>
                 <a
-                  href="https://waze.com/ul?q=Villa+di+Maiano+Florence+Italy"
+                  href="https://www.waze.com/fil/live-map/directions/chuai-heng-banquet-hall-jalan-kampung-20-kuala-lumpur?to=place.w.66650143.666632507.3440872"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-xs font-sans font-semibold tracking-[0.2em] text-brand-accent hover:text-brand-charcoal uppercase transition-colors border-b border-brand-rose/40 pb-1"
@@ -261,7 +261,7 @@ export default function DetailsSection({ onAttendClick, lang }: DetailsSectionPr
           <button
             id="attend-rsvp-trigger"
             onClick={onAttendClick}
-            className="mt-8 px-10 py-4 bg-brand-rose text-brand-cream hover:bg-brand-cream hover:text-brand-charcoal transition-colors duration-300 font-sans font-semibold text-xs tracking-[0.25em] uppercase cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cream focus:ring-offset-2 focus:ring-offset-brand-charcoal"
+            className="mt-8 px-10 py-4 bg-brand-rose text-brand-cream hover:bg-brand-cream hover:text-brand-charcoal transition-colors duration-300 font-sans font-semibold text-xs tracking-[0.25em] uppercase cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-brand-cream focus:ring-offset-2 focus:ring-offset-brand-charcoal"
           >
             {t.attendBtn}
           </button>

@@ -13,8 +13,8 @@ interface TimeRemaining {
   isCompleted: boolean;
 }
 
-// Wedding Ceremony Target Date: September 12, 2026 at 4:00 PM (16:00:00)
-const TARGET_DATE = "2026-09-12T16:00:00";
+// Wedding Day Target: January 2, 2027 at 6:00 PM (Photo Session start) Kuala Lumpur time (UTC+8, no DST)
+const TARGET_DATE = "2027-01-02T18:00:00+08:00";
 
 function calculateTimeRemaining(): TimeRemaining {
   const difference = new Date(TARGET_DATE).getTime() - Date.now();

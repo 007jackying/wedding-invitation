@@ -35,34 +35,34 @@ const TIMELINE_COLLECTION = "timeline";
 export const DEFAULT_TIMELINE: TimelineItem[] = [
   {
     id: "item1",
-    timeEn: "04:00 PM",
-    textEn: "Welcoming & Drinks",
-    timeCn: "下午 04:00",
-    textCn: "宾客入场与迎宾饮品",
+    timeEn: "06:00 PM",
+    textEn: "Photo Session",
+    timeCn: "晚上 06:00",
+    textCn: "拍照环节",
     order: 1
   },
   {
     id: "item2",
-    timeEn: "04:30 PM",
-    textEn: "Marriage Ceremony",
-    timeCn: "下午 04:30",
-    textCn: "婚礼仪式",
+    timeEn: "07:00 PM",
+    textEn: "Ceremony Begins",
+    timeCn: "晚上 07:00",
+    textCn: "婚礼仪式开始",
     order: 2
   },
   {
     id: "item3",
-    timeEn: "06:00 PM",
-    textEn: "Banquet Dinner",
-    timeCn: "晚上 06:00",
-    textCn: "婚宴晚宴",
+    timeEn: "10:00 PM",
+    textEn: "Dinner Ends & Thank You",
+    timeCn: "晚上 10:00",
+    textCn: "晚宴结束 · 答谢来宾",
     order: 3
   },
   {
     id: "item4",
-    timeEn: "09:00 PM",
-    textEn: "Dancing & Celebration",
-    timeCn: "晚上 09:00",
-    textCn: "派对与狂欢",
+    timeEn: "10:30 PM",
+    textEn: "Farewell",
+    timeCn: "晚上 10:30",
+    textCn: "送客离场",
     order: 4
   }
 ];

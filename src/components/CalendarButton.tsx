@@ -31,13 +31,13 @@ export default function CalendarButton({ lang }: CalendarButtonProps) {
       "CALSCALE:GREGORIAN",
       "METHOD:PUBLISH",
       "BEGIN:VEVENT",
-      "UID:wedding-eva-vincent-2026@evavincentwedding.com",
+      "UID:wedding-eva-vincent-2027@evavincentwedding.com",
       "DTSTAMP:20260718T000000Z",
-      "DTSTART:20260912T140000Z", // 16:00 Europe/Rome (CEST UTC+2)
-      "DTEND:20260912T220000Z",   // 00:00 Europe/Rome (CEST UTC+2) on Sept 13
+      "DTSTART:20270102T100000Z", // 18:00 Asia/Kuala_Lumpur (UTC+8)
+      "DTEND:20270102T143000Z",   // 22:30 Asia/Kuala_Lumpur (UTC+8)
       "SUMMARY:Wedding of Eva & Vincent | Eva 与 Vincent 的婚礼",
-      "DESCRIPTION:Join us to celebrate the wedding of Eva and Vincent at Villa di Maiano, Florence, Italy.\\n\\nSchedule:\\n- 04:00 PM: Welcoming & Drinks\\n- 04:30 PM: Marriage Ceremony\\n- 06:00 PM: Banquet Dinner\\n- 09:00 PM: Dancing & Celebration",
-      "LOCATION:Villa di Maiano, Via del Salviatino 1, 50137 Fiesole, Florence, Italy",
+      "DESCRIPTION:Join us to celebrate the wedding of Eva and Vincent at Chuai Heng Banquet Hall, Kuala Lumpur, Malaysia.\\n\\nSchedule:\\n- 06:00 PM: Photo Session\\n- 07:00 PM: Ceremony Begins\\n- 10:00 PM: Dinner Ends & Thank You\\n- 10:30 PM: Farewell",
+      "LOCATION:Chuai Heng Banquet Hall, 20, Jalan Kampung, Imbi, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur",
       "SEQUENCE:0",
       "STATUS:CONFIRMED",
       "TRANSP:OPAQUE",
@@ -60,23 +60,23 @@ export default function CalendarButton({ lang }: CalendarButtonProps) {
   const getGoogleCalendarUrl = () => {
     const base = "https://calendar.google.com/calendar/render?action=TEMPLATE";
     const title = encodeURIComponent("Wedding of Eva & Vincent | Eva 与 Vincent 的婚礼");
-    const dates = "20260912T140000Z/20260912T220000Z";
+    const dates = "20270102T100000Z/20270102T143000Z";
     const details = encodeURIComponent(
-      "Join us to celebrate the wedding of Eva and Vincent at Villa di Maiano, Florence, Italy.\n\nSchedule:\n- 04:00 PM: Welcoming & Drinks\n- 04:30 PM: Marriage Ceremony\n- 06:00 PM: Banquet Dinner\n- 09:00 PM: Dancing & Celebration"
+      "Join us to celebrate the wedding of Eva and Vincent at Chuai Heng Banquet Hall, Kuala Lumpur, Malaysia.\n\nSchedule:\n- 06:00 PM: Photo Session\n- 07:00 PM: Ceremony Begins\n- 10:00 PM: Dinner Ends & Thank You\n- 10:30 PM: Farewell"
     );
-    const location = encodeURIComponent("Villa di Maiano, Via del Salviatino 1, 50137 Fiesole, Florence, Italy");
+    const location = encodeURIComponent("Chuai Heng Banquet Hall, 20, Jalan Kampung, Imbi, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur");
     return `${base}&text=${title}&dates=${dates}&details=${details}&location=${location}`;
   };
 
   const getOutlookCalendarUrl = () => {
     const base = "https://outlook.live.com/calendar/0/deeplink/compose?path=/calendar/action/compose&rru=addevent";
     const subject = encodeURIComponent("Wedding of Eva & Vincent | Eva 与 Vincent 的婚礼");
-    const startdt = "2026-09-12T14:00:00Z";
-    const enddt = "2026-09-12T22:00:00Z";
+    const startdt = "2027-01-02T10:00:00Z";
+    const enddt = "2027-01-02T14:30:00Z";
     const body = encodeURIComponent(
-      "Join us to celebrate the wedding of Eva and Vincent at Villa di Maiano, Florence, Italy.\n\nSchedule:\n- 04:00 PM: Welcoming & Drinks\n- 04:30 PM: Marriage Ceremony\n- 06:00 PM: Banquet Dinner\n- 09:00 PM: Dancing & Celebration"
+      "Join us to celebrate the wedding of Eva and Vincent at Chuai Heng Banquet Hall, Kuala Lumpur, Malaysia.\n\nSchedule:\n- 06:00 PM: Photo Session\n- 07:00 PM: Ceremony Begins\n- 10:00 PM: Dinner Ends & Thank You\n- 10:30 PM: Farewell"
     );
-    const location = encodeURIComponent("Villa di Maiano, Via del Salviatino 1, 50137 Fiesole, Florence, Italy");
+    const location = encodeURIComponent("Chuai Heng Banquet Hall, 20, Jalan Kampung, Imbi, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur");
     return `${base}&subject=${subject}&startdt=${startdt}&enddt=${enddt}&body=${body}&location=${location}`;
   };
 
