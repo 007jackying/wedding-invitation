@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, Heart, Loader2, Phone, Mail, User, Users, Leaf, Utensils } from "lucide-react";
+import { track } from "@vercel/analytics";
 import { RSVPFormData, RSVPModalProps } from "../types";
 import { translations } from "../translations";
 import { updateRSVP } from "../firebase";
@@ -57,6 +58,12 @@ export default function RSVPModal({ isOpen, onClose, onSubmitSuccess, lang, code
       };
       const { id: _id, ...fields } = submittedData;
       await updateRSVP(code, fields);
+
+      track("RSVP Submitted", {
+        attending,
+        guestCount: submittedData.guestCount,
+        dietChoice: submittedData.dietChoice,
+      });
 
       // Close modal & trigger success sequence
       onSubmitSuccess(submittedData);

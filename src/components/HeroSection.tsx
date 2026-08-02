@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { ChevronDown } from "lucide-react";
+import { track } from "@vercel/analytics";
 import { translations } from "../translations";
 import CountdownTimer from "./CountdownTimer";
 import BackgroundSlideshow from "./BackgroundSlideshow";
@@ -29,6 +30,7 @@ export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: He
   const tRsvp = translations[lang].rsvp;
 
   const scrollToNext = () => {
+    track("Hero Scroll Clicked");
     const nextSection = document.getElementById("details");
     if (nextSection) {
       nextSection.scrollIntoView({ behavior: "smooth" });

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Lock } from "lucide-react";
+import { track } from "@vercel/analytics";
 import HeroSection from "./components/HeroSection";
 import DetailsSection from "./components/DetailsSection";
 import DressCodeSection from "./components/DressCodeSection";
@@ -39,7 +40,13 @@ export default function App() {
         return null;
       })
       .then((found) => {
-        if (!cancelled) setInvite(found);
+        if (!cancelled) {
+          setInvite(found);
+          track("Invite Link Opened", {
+            isValid: !!found,
+            hasReplied: !!found?.timestamp,
+          });
+        }
       });
     return () => {
       cancelled = true;
@@ -105,7 +112,10 @@ export default function App() {
 
   const handleOpenModal = () => {
     // Guarded: without a resolved invite there is no document to write the reply to.
-    if (invite) setIsModalOpen(true);
+    if (invite) {
+      track("RSVP Modal Opened");
+      setIsModalOpen(true);
+    }
   };
 
   const handleCloseModal = () => {
@@ -159,6 +169,7 @@ export default function App() {
         <div className="flex items-center gap-1.5 bg-white border border-brand-rose/10 rounded-full px-1.5 py-1 shadow-xs hover:shadow-md transition-all">
           <button
             onClick={() => {
+              track("Language Switched", { lang: "en" });
               window.location.hash = "en";
             }}
             className={`text-[10px] font-sans font-semibold tracking-wider uppercase px-3 py-1.5 rounded-full transition-all duration-300 cursor-pointer ${
@@ -171,6 +182,7 @@ export default function App() {
           </button>
           <button
             onClick={() => {
+              track("Language Switched", { lang: "cn" });
               window.location.hash = "cn";
             }}
             className={`text-[10px] font-sans font-semibold tracking-wider uppercase px-3 py-1.5 rounded-full transition-all duration-300 cursor-pointer ${

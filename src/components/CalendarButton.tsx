@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Calendar, ChevronDown, Download, ExternalLink } from "lucide-react";
+import { track } from "@vercel/analytics";
 import { translations } from "../translations";
 
 interface CalendarButtonProps {
@@ -112,7 +113,10 @@ export default function CalendarButton({ lang }: CalendarButtonProps) {
               href={getGoogleCalendarUrl()}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                track("Add to Calendar", { provider: "Google Calendar" });
+                setIsOpen(false);
+              }}
               className="flex items-center justify-between px-4 py-2.5 text-xs text-brand-charcoal hover:bg-brand-blush/30 transition-colors duration-200"
             >
               <span className="font-medium">{t.google}</span>
@@ -124,7 +128,10 @@ export default function CalendarButton({ lang }: CalendarButtonProps) {
               href={getOutlookCalendarUrl()}
               target="_blank"
               rel="noopener noreferrer"
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                track("Add to Calendar", { provider: "Outlook" });
+                setIsOpen(false);
+              }}
               className="flex items-center justify-between px-4 py-2.5 text-xs text-brand-charcoal hover:bg-brand-blush/30 transition-colors duration-200"
             >
               <span className="font-medium">{t.outlook}</span>
@@ -136,7 +143,10 @@ export default function CalendarButton({ lang }: CalendarButtonProps) {
 
             {/* Apple / Universal ICS Download Link */}
             <button
-              onClick={generateIcsFile}
+              onClick={() => {
+                track("Add to Calendar", { provider: "Apple/ICS" });
+                generateIcsFile();
+              }}
               className="w-full flex items-center justify-between px-4 py-2.5 text-xs text-brand-charcoal hover:bg-brand-blush/30 transition-colors duration-200 text-left cursor-pointer"
             >
               <span className="font-semibold text-brand-accent">{t.apple}</span>
@@ -145,7 +155,10 @@ export default function CalendarButton({ lang }: CalendarButtonProps) {
 
             {/* General Description Link */}
             <button
-              onClick={generateIcsFile}
+              onClick={() => {
+                track("Add to Calendar", { provider: "ICS File" });
+                generateIcsFile();
+              }}
               className="w-full flex items-center justify-between px-4 py-2 text-[10px] text-brand-olive/70 hover:bg-brand-blush/30 transition-colors duration-200 text-left cursor-pointer"
             >
               <span>{t.downloadIcs}</span>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, ChevronLeft, ChevronRight, Users, HeartHandshake, UtensilsCrossed, PartyPopper } from "lucide-react";
+import { track } from "@vercel/analytics";
 import { translations } from "../translations";
 import CalendarButton from "./CalendarButton";
 import { onTimelineSnapshot } from "../firebase";
@@ -183,6 +184,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
                   href="https://maps.google.com/?q=Chuai+Heng+Banquet+Hall+Kuala+Lumpur"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => track("Directions Opened", { provider: "Google Maps" })}
                   className="text-xs font-sans font-semibold tracking-[0.2em] text-brand-accent hover:text-brand-charcoal uppercase transition-colors border-b border-brand-rose/40 pb-1"
                 >
                   {t.cards.where.mapLink}
@@ -191,6 +193,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
                   href="https://www.waze.com/fil/live-map/directions/chuai-heng-banquet-hall-jalan-kampung-20-kuala-lumpur?to=place.w.66650143.666632507.3440872"
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => track("Directions Opened", { provider: "Waze" })}
                   className="text-xs font-sans font-semibold tracking-[0.2em] text-brand-accent hover:text-brand-charcoal uppercase transition-colors border-b border-brand-rose/40 pb-1"
                 >
                   {t.cards.where.wazeLink}

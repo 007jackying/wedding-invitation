@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { track } from "@vercel/analytics";
 import {
   ShieldCheck,
   Search,
@@ -147,9 +148,11 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     if (fullPin.length === 6) {
       if (fullPin === ADMIN_PIN) {
         setIsAuthenticated(true);
+        track("Admin Login", { success: true });
         triggerToast("Login Successful! Welcome, Eva & Vincent.");
       } else {
         setPinError(true);
+        track("Admin Login", { success: false });
         setPin(Array(6).fill(""));
         pinInputsRef.current[0]?.focus();
       }
@@ -247,6 +250,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     setIsLoading(true);
     try {
       const created = await createInvite(newGuestName.trim());
+      track("Invite Created");
       await copyInviteLink(created.id, `Invite created — link copied for ${created.guestName}`);
       setNewGuestName("");
       setIsAddingGuest(false);
@@ -262,6 +266,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     `${window.location.origin}${window.location.pathname}?g=${code}`;
 
   const copyInviteLink = async (code: string, message = "Invite link copied") => {
+    track("Invite Link Copied");
     const link = inviteLink(code);
     try {
       await navigator.clipboard.writeText(link);
@@ -433,6 +438,7 @@ export default function AdminDashboard({ onBack }: AdminDashboardProps) {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    track("CSV Exported", { count: sortedSubmissions.length });
     triggerToast("Guestlist CSV file downloaded successfully!");
   };
 

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Volume2, VolumeX } from "lucide-react";
+import { track } from "@vercel/analytics";
 
 interface AudioPlayerProps {
   lang: "en" | "cn";
@@ -27,7 +28,9 @@ export default function AudioPlayer({ lang }: AudioPlayerProps) {
   }, [isPlaying]);
 
   const handleTogglePlay = () => {
-    setIsPlaying(!isPlaying);
+    const nextState = !isPlaying;
+    setIsPlaying(nextState);
+    track("Music Toggled", { action: nextState ? "play" : "pause" });
   };
 
   const labels = {

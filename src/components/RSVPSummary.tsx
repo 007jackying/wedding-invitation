@@ -1,4 +1,5 @@
 import { Check, X } from "lucide-react";
+import { track } from "@vercel/analytics";
 import { CONTACTS, RSVPFormData } from "../types";
 import { translations } from "../translations";
 
@@ -87,6 +88,7 @@ function ContactLinks({
           href={`https://wa.me/${contact.whatsapp}?text=${encodeURIComponent(message(contact.name))}`}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => track("WhatsApp Contact Clicked", { contact: contact.name })}
           aria-label={
             lang === "cn"
               ? `通过 WhatsApp 联系${contact.name}`
