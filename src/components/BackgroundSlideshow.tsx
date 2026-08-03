@@ -28,14 +28,21 @@ export default function BackgroundSlideshow() {
           <img
             src={SLIDESHOW_IMAGES[index]}
             alt="Wedding scenery background"
-            className="w-full h-full object-cover brightness-70"
+            /* object-position 50% 30% is load-bearing, not taste. object-cover
+               re-crops as the viewport ratio changes, which slides the couple up
+               and down the frame; anchoring the crop at 30% cancels almost all of
+               that drift, holding their heads at ~25% of the viewport height from
+               a 390px phone to an ultrawide. The hero's text zones are positioned
+               against that constant — see HeroSection. */
+            className="w-full h-full object-cover object-[50%_30%] brightness-70"
             fetchPriority="high"
             referrerPolicy="no-referrer"
           />
         </motion.div>
       </AnimatePresence>
-      {/* ponytail: no scrim or filter — photos run clean. Hero type rests on the
-          .text-shadow-* helpers alone; add one gradient back if a photo goes pale. */}
+      {/* ponytail: no scrim overlay — the photo is dimmed with `brightness-70` on
+          the image itself, which costs one class instead of two stacked divs.
+          Hero type rests on that plus the .text-shadow-* helpers. */}
     </div>
   );
 }

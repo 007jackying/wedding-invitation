@@ -7,40 +7,66 @@ interface AudioPlayerProps {
   lang: "en" | "cn";
 }
 
+const STORAGE_KEY = "wedding.musicMuted";
+
+// localStorage throws rather than no-ops in some privacy modes, and this runs
+// during the hero's first render — an uncaught throw here would take the whole
+// invitation down over a music preference.
+function readMuted(): boolean {
+  try {
+    // Only an explicit "false" opts into sound; first-time visitors start muted.
+    return localStorage.getItem(STORAGE_KEY) !== "false";
+  } catch {
+    return true;
+  }
+}
+
+function saveMuted(muted: boolean) {
+  try {
+    localStorage.setItem(STORAGE_KEY, String(muted));
+  } catch {
+    // Preference just won't survive the session. Not worth telling the guest.
+  }
+}
+
 export default function AudioPlayer({ lang }: AudioPlayerProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [muted, setMuted] = useState(readMuted);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const audioUrl = "/music.mp3";
 
-  // Handle audio state transitions
+  // The track runs from load; `muted` is the only thing the button changes.
+  // Browsers permit autoplay only while muted, so a returning guest who chose
+  // sound still needs one gesture before it can be honoured — if play() is
+  // refused we drop back to muted so the icon isn't claiming sound that isn't
+  // there.
   useEffect(() => {
-    if (!audioRef.current) return;
+    const el = audioRef.current;
+    if (!el) return;
+    el.muted = muted;
+    el.play().catch(() => {
+      if (!muted) setMuted(true);
+    });
+  }, [muted]);
 
-    if (isPlaying) {
-      audioRef.current.play().catch((err) => {
-        console.warn("Audio play blocked by browser autoplay restriction:", err);
-        setIsPlaying(false);
-      });
-    } else {
-      audioRef.current.pause();
-    }
-  }, [isPlaying]);
-
-  const handleTogglePlay = () => {
-    const nextState = !isPlaying;
-    setIsPlaying(nextState);
-    track("Music Toggled", { action: nextState ? "play" : "pause" });
+  const handleToggleMute = () => {
+    const next = !muted;
+    setMuted(next);
+    saveMuted(next);
+    track("Music Toggled", { action: next ? "mute" : "unmute" });
   };
+
+  // Playing but silent is still "off" to a guest, so the UI keys off audibility.
+  const audible = !muted;
 
   const labels = {
     en: {
-      play: "Play Background Music",
-      mute: "Mute Music",
+      play: "Unmute music",
+      mute: "Mute music",
       nowPlaying: "Playing Blue Hour by Taisei Iwasaki",
     },
     cn: {
-      play: "播放背景音乐",
+      play: "开启背景音乐",
       mute: "静音背景音乐",
       nowPlaying: "正在播放 Blue Hour — 岩崎太整",
     }
@@ -53,23 +79,25 @@ export default function AudioPlayer({ lang }: AudioPlayerProps) {
         ref={audioRef}
         src={audioUrl}
         loop
+        autoPlay
+        muted={muted}
         preload="auto"
       />
 
       {/* Small Rounded Floating Music Icon Toggle Button */}
       <motion.button
-        onClick={handleTogglePlay}
+        onClick={handleToggleMute}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         className={`relative flex items-center justify-center w-9 h-9 rounded-full bg-white border border-brand-rose/15 shadow-xs hover:shadow-md hover:border-brand-rose/35 transition-colors duration-300 cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-rose/30 ${
-          isPlaying ? "text-brand-rose" : "text-brand-charcoal/50"
+          audible ? "text-brand-rose" : "text-brand-charcoal/50"
         }`}
-        title={isPlaying ? labels.mute : labels.play}
-        aria-label={isPlaying ? labels.mute : labels.play}
+        title={audible ? labels.mute : labels.play}
+        aria-label={audible ? labels.mute : labels.play}
       >
         {/* Subtle pulsating outer ring when playing */}
         <AnimatePresence>
-          {isPlaying && (
+          {audible && (
             <motion.span
               initial={{ scale: 0.8, opacity: 0.5 }}
               animate={{ scale: 1.4, opacity: 0 }}
@@ -80,7 +108,7 @@ export default function AudioPlayer({ lang }: AudioPlayerProps) {
           )}
         </AnimatePresence>
 
-        {isPlaying ? (
+        {audible ? (
           <Volume2 className="w-4 h-4 animate-pulse" />
 
         ) : (
@@ -90,7 +118,7 @@ export default function AudioPlayer({ lang }: AudioPlayerProps) {
 
       {/* Scrolling now-playing marquee */}
       <AnimatePresence>
-        {isPlaying && (
+        {audible && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
