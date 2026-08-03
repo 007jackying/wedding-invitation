@@ -43,30 +43,25 @@ export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: He
       <div className="relative z-10 flex-1 flex flex-col justify-center items-center text-center w-full max-w-6xl mx-auto px-8 sm:px-14 min-h-0">
         <motion.p
           initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: -240 }}
           transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-          className="text-brand-cream/90 font-script font-light tracking-[0.1em] text-[25px] sm:text-[30px] mb-10 text-shadow-md"
+          className="text-brand-cream/90 font-script font-light tracking-[0.3em] text-[25px] sm:text-[60px] mb-10 text-shadow-md"
         >
           {t.weAreMarried}
         </motion.p>
 
         <motion.h1
           initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: -250 }}
           transition={{ duration: 1.3, delay: 0.7, ease: "easeOut" }}
           className="font-script font-normal text-brand-cream text-[clamp(4rem,14vw,9rem)] leading-[0.85] text-shadow-medium"
         >
-          <span className="block">Vincent {lang === "cn" ? "与" : "&"} Eva</span>
-          {/* Own line so both names centre on the same axis */}
-          {/* <span className="block font-serif italic font-light text-[0.3em] leading-[1.5] text-brand-blush/90">
-            {lang === "cn" ? "与" : "&"}
-          </span>
-          <span className="block">Vincent</span> */}
+          <span className="block">Vincent {lang === "cn" ? "囍" : "&"} Eva </span>
         </motion.h1>
 
         <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 230 }}
           transition={{ duration: 1.2, delay: 1.4 }}
           className="mt-6 font-serif italic text-brand-cream/85 text-lg sm:text-2xl tracking-wide text-shadow-strong"
         >
@@ -77,7 +72,7 @@ export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: He
             in a separate band at the foot of the hero. */}
         <motion.div
           initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
+          animate={{ opacity: 1, y: 230 }}
           transition={{ duration: 1, delay: 1.7, ease: "easeOut" }}
           className="mt-5 flex flex-col items-center gap-3"
         >
