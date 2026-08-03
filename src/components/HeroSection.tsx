@@ -56,12 +56,12 @@ export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: He
           transition={{ duration: 1.3, delay: 0.7, ease: "easeOut" }}
           className="font-script font-normal text-brand-cream text-[clamp(4rem,14vw,9rem)] leading-[0.85] text-shadow-strong"
         >
-          <span className="block">Eva</span>
+          <span className="block">Vincent {lang === "cn" ? "与" : "&"} Eva</span>
           {/* Own line so both names centre on the same axis */}
-          <span className="block font-serif italic font-light text-[0.3em] leading-[1.5] text-brand-blush/90">
+          {/* <span className="block font-serif italic font-light text-[0.3em] leading-[1.5] text-brand-blush/90">
             {lang === "cn" ? "与" : "&"}
           </span>
-          <span className="block">Vincent</span>
+          <span className="block">Vincent</span> */}
         </motion.h1>
 
         <motion.p
