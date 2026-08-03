@@ -189,7 +189,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
                   {t.cards.where.mapLink}
                 </a>
                 <a
-                  href="https://www.waze.com/fil/live-map/directions/chuai-heng-banquet-hall-jalan-kampung-20-kuala-lumpur?to=place.w.66650143.666632507.3440872"
+                  href="waze://?h=w283fssu6&n=T&utm_source=waze_website&utm_medium=web-livemap-mobile-openapp-location&utm_campaign=default"
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => track("Directions Opened", { provider: "Waze" })}
