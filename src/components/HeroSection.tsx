@@ -45,7 +45,7 @@ export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: He
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-          className="text-brand-cream/90 font-sans font-semibold uppercase tracking-[0.35em] text-[25px] sm:text-[30px] mb-10 text-shadow-md"
+          className="text-brand-cream/90 font-script font-light tracking-[0.1em] text-[25px] sm:text-[30px] mb-10 text-shadow-md"
         >
           {t.weAreMarried}
         </motion.p>
@@ -54,7 +54,7 @@ export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: He
           initial={{ opacity: 0, y: 28 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.3, delay: 0.7, ease: "easeOut" }}
-          className="font-script font-normal text-brand-cream text-[clamp(4rem,14vw,9rem)] leading-[0.85] text-shadow-strong"
+          className="font-script font-normal text-brand-cream text-[clamp(4rem,14vw,9rem)] leading-[0.85] text-shadow-medium"
         >
           <span className="block">Vincent {lang === "cn" ? "与" : "&"} Eva</span>
           {/* Own line so both names centre on the same axis */}
@@ -86,20 +86,6 @@ export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: He
             {t.datePlace}
           </p>
           <CountdownTimer lang={lang} />
-
-          {myRSVP ? (
-            <RSVPSummary rsvp={myRSVP} lang={lang} />
-          ) : !canRSVP ? (
-            <NeedInvite lang={lang} />
-          ) : (
-            <button
-              type="button"
-              onClick={onAttendClick}
-              className="mt-1 px-8 py-3.5 bg-brand-accent text-brand-cream hover:bg-brand-cream hover:text-brand-charcoal transition-colors duration-300 font-sans font-semibold text-xs sm:text-sm tracking-[0.25em] uppercase cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-brand-gold focus:ring-offset-2 focus:ring-offset-black/40"
-            >
-              {tRsvp.accept}
-            </button>
-          )}
         </motion.div>
       </div>
 

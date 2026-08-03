@@ -28,7 +28,7 @@ export default function BackgroundSlideshow() {
           <img
             src={SLIDESHOW_IMAGES[index]}
             alt="Wedding scenery background"
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover brightness-70"
             fetchPriority="high"
             referrerPolicy="no-referrer"
           />
