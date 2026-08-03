@@ -110,7 +110,6 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
           <h2 className="font-serif italic font-light text-5xl sm:text-6xl text-brand-charcoal mt-4">
             {t.title}
           </h2>
-          <div className="w-16 h-px bg-brand-gold mt-8" />
         </div>
 
         {/* Programma / Venue spread */}
@@ -169,7 +168,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
               {t.cards.where.venueVal}
             </p>
 
-            <div className="border-t border-brand-charcoal/15 pt-6">
+            <div className="pt-6">
               <h4 className="text-[11px] font-sans font-semibold tracking-[0.3em] uppercase text-brand-olive mb-3">
                 {t.cards.where.addressLabel}
               </h4>
@@ -203,7 +202,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
           </div>
         </div>
 
-        {/* Postcard from the venue */}
+        {/* Postcard from the venue
         <motion.figure
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -247,7 +246,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
               ))}
             </span>
           </figcaption>
-        </motion.figure>
+        </motion.figure> */}
 
         {/* RSVP band */}
         <motion.div
@@ -280,7 +279,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
         </motion.div>
       </motion.div>
 
-      {/* Full screen photo overlay */}
+      {/* Full screen photo overlay
       <AnimatePresence>
         {isLandscapeOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-brand-charcoal/90 backdrop-blur-md">
@@ -356,7 +355,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </section>
   );
 }

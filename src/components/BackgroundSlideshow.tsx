@@ -1,12 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
-const SLIDESHOW_IMAGES = [
-  "https://images.unsplash.com/photo-1519741497674-611481863552?q=80&w=2000&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1583939003579-730e3918a45a?q=80&w=2000&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2000&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1523438885200-e635ba2c371e?q=80&w=2000&auto=format&fit=crop"
-];
+const SLIDESHOW_IMAGES = ["/photos/first.jpeg"]
 
 export default function BackgroundSlideshow() {
   const [index, setIndex] = useState(0);
@@ -25,7 +20,7 @@ export default function BackgroundSlideshow() {
         <motion.div
           key={index}
           initial={{ opacity: 0, scale: 1.05 }}
-          animate={{ opacity: 0.65, scale: 1 }} // Increased from 0.25 to 0.65 for stunning, clear visibility of wedding photos
+          animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.98 }}
           transition={{ duration: 2.5, ease: "easeInOut" }}
           className="absolute inset-0 w-full h-full"
@@ -33,16 +28,21 @@ export default function BackgroundSlideshow() {
           <img
             src={SLIDESHOW_IMAGES[index]}
             alt="Wedding scenery background"
-            className="w-full h-full object-cover filter brightness-[0.98] contrast-[1.03]"
+            /* object-position 50% 30% is load-bearing, not taste. object-cover
+               re-crops as the viewport ratio changes, which slides the couple up
+               and down the frame; anchoring the crop at 30% cancels almost all of
+               that drift, holding their heads at ~25% of the viewport height from
+               a 390px phone to an ultrawide. The hero's text zones are positioned
+               against that constant — see HeroSection. */
+            className="w-full h-full object-cover object-[50%_30%] brightness-70"
+            fetchPriority="high"
             referrerPolicy="no-referrer"
           />
         </motion.div>
       </AnimatePresence>
-
-      {/* Primary Cinematic Dark Protective Vignette Overlay */}
-      {/* Ensures the natural, gorgeous beauty of the photos shines through while making white text pop flawlessly */}
-      <div className="absolute inset-0 bg-black/35" />
-      <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-transparent to-black/60" />
+      {/* ponytail: no scrim overlay — the photo is dimmed with `brightness-70` on
+          the image itself, which costs one class instead of two stacked divs.
+          Hero type rests on that plus the .text-shadow-* helpers. */}
     </div>
   );
 }

@@ -26,8 +26,7 @@ Defined in `src/index.css`.
 | `brand-charcoal` | `#2A3123` | Cypress ink — primary text, dark surfaces | 12.6:1 ✅ |
 | `brand-olive` | `#59604A` | Moss — secondary text | 6.1:1 ✅ |
 
-Supporting values: scrollbar thumb `#E0D4A8`; hero photo scrims `black/35` plus a
-`black/45 → transparent → black/60` vertical gradient; modal backdrops
+Supporting values: scrollbar thumb `#E0D4A8`; modal backdrops
 `brand-charcoal/40–45` with a blur.
 
 ## Typefaces
@@ -45,10 +44,14 @@ Chinese has no true italics, so `.italic` is forced upright under `[data-lang="c
 
 ## 1 · Hero
 
-**Background:** full-bleed photo slideshow (4 images, 8s crossfade) under a
-`black/35` scrim and a vertical gradient. All text is `brand-cream` with
-`.text-shadow-*` helpers for legibility. A `brand-gold` double keyline frames
-the section, with L-shaped corner accents. Gold stardust motes drift behind the type.
+**Background:** full-bleed photograph of the couple (`public/photos/first.jpeg`),
+shown at full opacity with no scrim, gradient or filter, and with no frame — the
+photo reads clean. All text is `brand-cream` over it and relies on the
+`.text-shadow-*` helpers alone for legibility. Gold stardust motes drift behind
+the type.
+
+The slideshow machinery is still in place (8s cross-fade); it is simply holding a
+single photo. Add more paths to `SLIDESHOW_IMAGES` and it cycles again.
 
 | Element | Font | Size | Weight / treatment | Colour |
 |---|---|---|---|---|
@@ -57,6 +60,7 @@ the section, with L-shaped corner accents. Gold stardust motes drift behind the 
 | "&" connector | Fraunces | `0.3em` of the names (≈19–43px) | Italic light, own line | `brand-blush/90` |
 | "Save our Date" | Fraunces | 18 → 24px | Italic | `brand-cream/85` |
 | Gold rule | — | 64 × 1px | — | `brand-gold/80` |
+| *(no photo frame — the double keyline and corner accents were removed so the photograph reads uncropped)* | — | — | — | — |
 | Date + venue | Inter | 12 → 14px | Medium, uppercase, `0.15em → 0.25em` tracking | `brand-cream` |
 | Countdown numbers | Fraunces | 20 → 30px | Tabular figures | `brand-cream` |
 | Countdown labels | Inter | 9 → 12px | Semibold, uppercase, `0.2em` tracking | `brand-cream/70` |
@@ -186,8 +190,9 @@ guests who need to change something message the couple on WhatsApp instead.
   body copy; small text uses `brand-accent`, `brand-charcoal` or `brand-olive`.
 - Everything honours `prefers-reduced-motion`: the stardust drift, the entrance
   animations and smooth scrolling all stop.
-- Hero type sits on photographs, so it relies on the `.text-shadow-sm / -md /
-  -lg / -strong` helpers in `src/index.css` rather than on the scrims alone.
+- Hero type sits on an unscrimmed photograph, so legibility rests entirely on the
+  `.text-shadow-sm / -md / -lg / -strong` helpers in `src/index.css`. Any new hero
+  photo has to be checked against the cream type before it goes in.
 
 ## 9 · Dashboard duplicate warnings
 

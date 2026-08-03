@@ -5,7 +5,6 @@ import { translations } from "../translations";
 import CountdownTimer from "./CountdownTimer";
 import BackgroundSlideshow from "./BackgroundSlideshow";
 import Stardust from "./Stardust";
-import RSVPSummary, { NeedInvite } from "./RSVPSummary";
 import { RSVPFormData } from "../types";
 
 interface HeroSectionProps {
@@ -16,25 +15,41 @@ interface HeroSectionProps {
   onAttendClick: () => void;
 }
 
-// L-shaped gold marks that finish each corner of the frame; the radius has to
-// match the frame's own rounding or the marks sit off the curve.
-const FRAME_CORNERS = [
-  "top-0 left-0 border-t-2 border-l-2 rounded-tl-3xl",
-  "top-0 right-0 border-t-2 border-r-2 rounded-tr-3xl",
-  "bottom-0 left-0 border-b-2 border-l-2 rounded-bl-3xl",
-  "bottom-0 right-0 border-b-2 border-r-2 rounded-br-3xl",
-];
+// Both groups start converged near the middle of the frame and split outward to
+// their resting bands. Offsets are in vh so the travel is a share of the screen,
+// not a fixed distance — the same gesture on a phone and on a desktop.
+const splitFrom = (offset: string) => ({
+  hidden: { y: offset, opacity: 0 },
+  show: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      duration: 1.7,
+      ease: [0.16, 1, 0.3, 1] as const,
+      delay: 0.25,
+      delayChildren: 0.7,
+      staggerChildren: 0.14,
+    },
+  },
+});
 
-export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: HeroSectionProps) {
+const RISE_UP = splitFrom("34vh");
+const SETTLE_DOWN = splitFrom("-28vh");
+
+// Each line then resolves on its own beat, so the split reads as a sequence
+// rather than two slabs moving.
+const line = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.9, ease: "easeOut" as const } },
+};
+
+export default function HeroSection({ lang }: HeroSectionProps) {
   const t = translations[lang].hero;
-  const tRsvp = translations[lang].rsvp;
+  const isCn = lang === "cn";
 
   const scrollToNext = () => {
     track("Hero Scroll Clicked");
-    const nextSection = document.getElementById("details");
-    if (nextSection) {
-      nextSection.scrollIntoView({ behavior: "smooth" });
-    }
+    document.getElementById("details")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
@@ -47,105 +62,108 @@ export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: He
       <BackgroundSlideshow />
       <Stardust />
 
-      {/* Framed photo area. The ticket band below sits outside the frame so the
-          gold rule never cuts across it. */}
-      <div className="relative flex-1 flex flex-col min-h-0">
-        {/* Luxury double-border frame with ornate gold corner accents */}
+      {/* Two bands pinned to fixed shares of the frame, measured against where the
+          couple actually sit in the photo once object-position has stopped the
+          crop drifting:
+            0 – 24%   sky above their heads      → the names
+            24 – 66%  their faces                → left empty on purpose
+            66 – 100% chest height down          → the date and countdown
+          Absolute rather than flex ratios: a flex item cannot shrink below its
+          own content, so a tall line box silently pushes the band past the face
+          it was supposed to clear. Anchoring removes that failure mode, and the
+          type is sized in svh as well as vw so it stays inside its band. */}
+      <div className="absolute inset-0 z-10 text-center">
+        {/* Bottom-aligned: the names sit just above the hairline, not floating. */}
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.4, delay: 0.2, ease: "easeOut" }}
-          className="pointer-events-none absolute inset-4 sm:inset-7 z-10 border border-brand-gold/45 rounded-3xl"
-          aria-hidden="true"
+          initial="hidden"
+          animate="show"
+          variants={RISE_UP}
+          className="absolute inset-x-0 top-0 h-[24%] flex flex-col items-center justify-end px-6 sm:px-14 pb-[1svh]"
         >
-          <div className="absolute inset-[5px] border border-brand-gold/25 rounded-[1.35rem]" />
-          {FRAME_CORNERS.map((position) => (
-            <span
-              key={position}
-              className={`absolute w-6 h-6 sm:w-9 sm:h-9 border-brand-gold ${position}`}
-            />
-          ))}
+          <motion.p
+            variants={line}
+            /* Alex Brush carries no CJK, so the Chinese eyebrow would drop to a
+               system fallback mid-line. It takes the Noto Serif SC stack that
+               the `cn` page wrapper already swaps in, at a size that matches the
+               script optically rather than numerically. */
+            className={
+              isCn
+                ? "text-brand-cream/90 font-serif font-light tracking-[0.25em] text-[clamp(1rem,min(3.4vw,4.5svh),2.5rem)] leading-none mb-[1.5svh] text-shadow-md"
+                /* leading-none is doing real work: Alex Brush declares a line box
+                   near 3× its point size, which otherwise makes this one line
+                   taller than the whole band it sits in. */
+                : "text-brand-cream/90 font-script font-light tracking-[0.3em] text-[clamp(1.25rem,min(4.5vw,6svh),3.5rem)] leading-none mb-[1svh] text-shadow-md"
+            }
+          >
+            {t.weAreMarried}
+          </motion.p>
+
+          <motion.h1
+            variants={line}
+            /* Width AND height aware: on a short landscape phone a purely vw
+               size would grow taller than the sky above their heads. */
+            className="font-script font-normal text-brand-cream text-[clamp(2.75rem,min(15vw,16svh),9rem)] leading-[0.9] text-shadow-strong"
+          >
+            <span className="block">
+              Vincent
+              {/* Alex Brush ends "Vincent" on a trailing swash, so the connector
+                  needs real air either side or the line reads as one word.
+                  囍 is a CJK glyph inside a Latin script face: sized down and
+                  nudged onto the script's optical centre so it sits with the
+                  names instead of towering over them. */}
+              <span
+                className={
+                  isCn
+                    ? "font-serif text-[0.45em] align-[0.16em] ml-[0.3em] mr-[0.2em]"
+                    : "mx-[0.2em]"
+                }
+              >
+                {isCn ? "囍" : "&"}
+              </span>
+              Eva
+            </span>
+          </motion.h1>
         </motion.div>
 
-      {/* Staggered letterpress name composition */}
-      <div className="relative z-10 flex-1 flex flex-col justify-center items-center text-center w-full max-w-6xl mx-auto px-8 sm:px-14 min-h-0">
-        <motion.p
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-          className="text-brand-cream/90 font-sans font-semibold uppercase tracking-[0.35em] text-[11px] sm:text-sm mb-4 text-shadow-md"
-        >
-          {t.weAreMarried}
-        </motion.p>
+        {/* 24% – 66% is their faces. Nothing is rendered there on purpose. */}
 
-        <motion.h1
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.3, delay: 0.7, ease: "easeOut" }}
-          className="font-script font-normal text-brand-cream text-[clamp(4rem,14vw,9rem)] leading-[0.85] text-shadow-strong"
-        >
-          <span className="block">Eva</span>
-          {/* Own line so both names centre on the same axis */}
-          <span className="block font-serif italic font-light text-[0.3em] leading-[1.5] text-brand-blush/90">
-            {lang === "cn" ? "与" : "&"}
-          </span>
-          <span className="block">Vincent</span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1.2, delay: 1.4 }}
-          className="mt-6 font-serif italic text-brand-cream/85 text-lg sm:text-2xl tracking-wide text-shadow-md"
-        >
-          {t.saveDate}
-        </motion.p>
-
-        {/* Date, venue & countdown sit with the save-the-date line rather than
-            in a separate band at the foot of the hero. */}
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, delay: 1.7, ease: "easeOut" }}
-          className="mt-5 flex flex-col items-center gap-3"
+          initial="hidden"
+          animate="show"
+          variants={SETTLE_DOWN}
+          className="absolute inset-x-0 top-[66%] bottom-0 flex flex-col items-center gap-[1.2svh] px-6 sm:px-14 pt-[1svh]"
         >
-          <div className="w-16 h-px bg-brand-gold/80" />
-          <p className="text-brand-cream font-sans font-medium tracking-[0.15em] sm:tracking-[0.25em] uppercase text-xs sm:text-sm text-shadow-sm max-w-full">
+          <motion.p
+            variants={line}
+            className="font-serif italic text-brand-cream/85 text-[clamp(1.0625rem,2.2vw,1.5rem)] tracking-wide text-shadow-strong"
+          >
+            {t.saveDate}
+          </motion.p>
+          <motion.div variants={line} className="w-16 h-px bg-brand-gold/80" />
+          <motion.p
+            variants={line}
+            className="text-brand-cream font-sans font-medium tracking-[0.15em] sm:tracking-[0.25em] uppercase text-xs sm:text-sm text-shadow-sm max-w-full"
+          >
             {t.datePlace}
-          </p>
-          <CountdownTimer lang={lang} />
+          </motion.p>
+          <motion.div variants={line}>
+            <CountdownTimer lang={lang} />
+          </motion.div>
 
-          {myRSVP ? (
-            <RSVPSummary rsvp={myRSVP} lang={lang} />
-          ) : !canRSVP ? (
-            <NeedInvite lang={lang} />
-          ) : (
-            <button
-              type="button"
-              onClick={onAttendClick}
-              className="mt-1 px-8 py-3.5 bg-brand-accent text-brand-cream hover:bg-brand-cream hover:text-brand-charcoal transition-colors duration-300 font-sans font-semibold text-xs sm:text-sm tracking-[0.25em] uppercase cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-brand-gold focus:ring-offset-2 focus:ring-offset-black/40"
-            >
-              {tRsvp.accept}
-            </button>
-          )}
+          {/* mt-auto so the cue takes up whatever slack is left in the band. */}
+          <motion.button
+            id="scroll-arrow"
+            onClick={scrollToNext}
+            variants={line}
+            className="mt-auto px-4 py-2 flex flex-col items-center gap-1 text-brand-cream/80 hover:text-brand-cream transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cream/60 rounded-full"
+            aria-label="Scroll to event details"
+          >
+            <span className="font-sans font-semibold text-[11px] tracking-[0.25em] uppercase text-shadow-sm">
+              {t.scrollText}
+            </span>
+            <ChevronDown className="w-5 h-5 animate-bounce" />
+          </motion.button>
         </motion.div>
-      </div>
-
-      {/* Scroll cue */}
-      <motion.button
-        id="scroll-arrow"
-        onClick={scrollToNext}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 1 }}
-        className="relative z-10 self-center mb-4 px-4 py-2 flex flex-col items-center gap-1 text-brand-cream/80 hover:text-brand-cream transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cream/60 rounded-full"
-        aria-label="Scroll to event details"
-      >
-        <span className="font-sans font-semibold text-[11px] tracking-[0.25em] uppercase text-shadow-sm">
-          {t.scrollText}
-        </span>
-        <ChevronDown className="w-5 h-5 animate-bounce" />
-      </motion.button>
       </div>
     </section>
   );
