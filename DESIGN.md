@@ -26,8 +26,7 @@ Defined in `src/index.css`.
 | `brand-charcoal` | `#2A3123` | Cypress ink — primary text, dark surfaces | 12.6:1 ✅ |
 | `brand-olive` | `#59604A` | Moss — secondary text | 6.1:1 ✅ |
 
-Supporting values: scrollbar thumb `#E0D4A8`; hero photo scrims `black/35` plus a
-`black/45 → transparent → black/60` vertical gradient; modal backdrops
+Supporting values: scrollbar thumb `#E0D4A8`; modal backdrops
 `brand-charcoal/40–45` with a blur.
 
 ## Typefaces
@@ -45,23 +44,47 @@ Chinese has no true italics, so `.italic` is forced upright under `[data-lang="c
 
 ## 1 · Hero
 
-**Background:** full-bleed photo slideshow (4 images, 8s crossfade) under a
-`black/35` scrim and a vertical gradient. All text is `brand-cream` with
-`.text-shadow-*` helpers for legibility. A `brand-gold` double keyline frames
-the section, with L-shaped corner accents. Gold stardust motes drift behind the type.
+**A photograph mounted on card stock.** The hero is split: the photo holds its
+own panel and the type sits beside it on the sand, never over it. No scrim, no
+filter, no frame — and because the panel is fixed at the photo's native **3:2**,
+nothing is cropped either. Photo right / type left from `lg` up; photo on top,
+type beneath on narrower screens.
+
+Type is left-aligned with a hard rag against the photo's straight edge. Nothing
+in this section is centred — centring is what makes a wedding hero look like a
+template, and the split gives the rag a reason to exist.
+
+**Signature — the date as a numeral lockup.** `02 · 01 · 2027` in Fraunces
+tabular figures, sized to be the loudest thing in the block after the names. The
+script says *who*, the numerals say *when*; the tension between the two carries
+the section. Day-first in English (Malaysian convention), **year-first in Chinese**
+(`2027 · 01 · 02`) — the order is localised, not just the words. Derived from
+`TARGET_DATE` in `CountdownTimer.tsx` and formatted in `Asia/Kuala_Lumpur`, so a
+guest reading from another timezone still sees the wedding day.
 
 | Element | Font | Size | Weight / treatment | Colour |
 |---|---|---|---|---|
-| "We are married" eyebrow | Inter | 11 → 14px | Semibold, uppercase, `0.35em` tracking | `brand-cream/90` |
-| **Eva / Vincent** | Alex Brush | `clamp(64px, 14vw, 144px)` | Regular, `0.85` line-height | `brand-cream` |
-| "&" connector | Fraunces | `0.3em` of the names (≈19–43px) | Italic light, own line | `brand-blush/90` |
-| "Save our Date" | Fraunces | 18 → 24px | Italic | `brand-cream/85` |
-| Gold rule | — | 64 × 1px | — | `brand-gold/80` |
-| Date + venue | Inter | 12 → 14px | Medium, uppercase, `0.15em → 0.25em` tracking | `brand-cream` |
-| Countdown numbers | Fraunces | 20 → 30px | Tabular figures | `brand-cream` |
-| Countdown labels | Inter | 9 → 12px | Semibold, uppercase, `0.2em` tracking | `brand-cream/70` |
+| "We are married" eyebrow | Inter | 11 → 12px | Semibold, uppercase, `0.35em` tracking | `brand-accent` |
+| **Eva / Vincent** | Alex Brush | `clamp(68px, 10vw, 100px)` | Regular, `0.86` line-height, left-aligned | `brand-charcoal` |
+| "&" / "与" connector | Fraunces | `0.34em` of the names | Light, raised, **trails the first name** so both lines hang off one left axis | `brand-accent` |
+| "Save our Date" | Fraunces | 18 → 20px | Italic | `brand-olive` |
+| Gold rule | — | 56 × 1px | — | `brand-gold` |
+| **Date numerals** | Fraunces | 30 → 40px | Tabular figures, `0.06em` tracking | `brand-charcoal`, separators `brand-rose` |
+| Venue / city | Inter | 11 → 12px | Semibold, uppercase, `0.2em` tracking, split at the comma so the break never lands inside the venue's name | `brand-olive` |
+| Countdown numbers | Fraunces | 20 → 24px | Tabular figures | `brand-charcoal` |
+| Countdown labels | Inter | 9 → 10px | Semibold, uppercase, `0.2em` tracking | `brand-olive` |
 | "Reply to the Invitation" button | Inter | 12 → 14px | Semibold, uppercase, `0.25em` tracking | `brand-cream` on `brand-accent`, pill |
-| "Scroll" cue | Inter | 11px | Semibold, uppercase, `0.25em` tracking | `brand-cream/80` |
+| "Scroll" cue | Inter | 11px | Semibold, uppercase, `0.25em` tracking | `brand-olive` |
+
+**Cut from this section:** the gold double keyline and its corner accents, both
+photo scrims, the brightness/contrast filter, the stardust, and every centred
+alignment. `Stardust.tsx` still exists but is no longer rendered — it was built to
+drift behind cream type on a dark photo, and over a clean photo carrying no type
+it was just specks. One line in `HeroSection` brings it back.
+
+The first photo paints without a fade (`initial={false}`); it is the largest
+thing on the page and this invitation is opened from a WhatsApp link on mobile
+data. Later slides still cross-fade.
 
 ## 2 · Details
 
@@ -145,18 +168,24 @@ the blue linework on the sand card.
 
 ## 7 · "Your reply" card
 
-Replaces the reply button once this device has already replied. Appears in the
-hero and in the details band — both dark grounds, so it uses one style:
-`black/40` blurred fill with a `brand-gold/40` border. There is no in-app edit;
-guests who need to change something message the couple on WhatsApp instead.
+Replaces the reply button once the guest has answered. It now lands on two
+different grounds, so it ships in two tones (`tone="light" | "dark"`, the map at
+the top of `RSVPSummary.tsx`) rather than assuming a dark one. The same two tones
+serve `NeedInvite`, the card shown to a visitor with no valid `?g=` code. There is
+no in-app edit; guests who need to change something message the couple on WhatsApp.
 
-| Element | Font | Size | Weight / treatment | Colour |
+- **light** — the hero's sand column. White fill, `brand-rose/25` border, left-aligned.
+- **dark** — the charcoal reply band in Details. `black/40` blurred fill, `brand-gold/40` border, centred.
+
+| Element | Font | Size | Light (sand) | Dark (charcoal / photo) |
 |---|---|---|---|---|
-| Status line | Inter | 11px | Semibold, uppercase, `0.18em` tracking | `brand-cream`; badge `brand-gold` (joining) or `brand-cream/25` (declined) |
-| Guest name | Fraunces | 18px | Regular | `brand-cream` |
-| Party size · meal | Inter | 12px | Tabular figures | `brand-cream/70` |
-| "Need to change something?" | Inter | 10px | Uppercase, `0.15em` tracking | `brand-cream/60` |
-| WhatsApp pills (Eva / Vincent) | Inter | 11px | Semibold, `0.1em` tracking, `brand-gold/40` rounded border | `brand-cream` label, glyph brand green `#25D366` |
+| Status line | Inter | 11px, semibold, `0.18em` | `brand-charcoal`; badge `brand-accent` / `brand-charcoal/15` | `brand-cream`; badge `brand-gold` / `brand-cream/25` |
+| Guest name | Fraunces | 18px | `brand-charcoal` | `brand-cream` |
+| Party size · meal | Inter | 12px, tabular | `brand-olive` | `brand-cream/70` |
+| "Need to change something?" | Inter | 10px, uppercase | `brand-olive` | `brand-cream/60` |
+| WhatsApp pills | Inter | 11px, semibold | `brand-rose/30` border, `brand-charcoal` label | `brand-gold/40` border, `brand-cream` label |
+
+The WhatsApp glyph stays brand green `#25D366` in both tones.
 
 ## 8 · Admin dashboard (`#admin`)
 
@@ -186,8 +215,10 @@ guests who need to change something message the couple on WhatsApp instead.
   body copy; small text uses `brand-accent`, `brand-charcoal` or `brand-olive`.
 - Everything honours `prefers-reduced-motion`: the stardust drift, the entrance
   animations and smooth scrolling all stop.
-- Hero type sits on photographs, so it relies on the `.text-shadow-sm / -md /
-  -lg / -strong` helpers in `src/index.css` rather than on the scrims alone.
+- No type is set over a photograph anywhere on the page. The hero splits them
+  apart, so every string sits on a flat brand ground at a known contrast ratio
+  and no photo can ever wash the type out. The `.text-shadow-*` helpers in
+  `src/index.css` are now unused by the hero and kept only for the Details band.
 
 ## 9 · Dashboard duplicate warnings
 

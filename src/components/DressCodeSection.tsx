@@ -55,11 +55,11 @@ function DressRow({ photoUrl, photoAlt, photoCaption, icon: Icon, title, desc, b
         <p className="font-sans text-sm sm:text-base font-light text-brand-charcoal/90 leading-relaxed max-w-lg">
           {desc}
         </p>
-        <ul className="mt-8 border-t border-brand-charcoal/15">
+        <ul className="mt-8">
           {bullets.map((bullet) => (
             <li
               key={bullet}
-              className="py-3.5 border-b border-brand-charcoal/15 flex items-baseline gap-3 text-sm font-light text-brand-olive leading-relaxed"
+              className="py-3.5 flex items-baseline gap-3 text-sm font-light text-brand-olive leading-relaxed"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-brand-rose shrink-0 translate-y-[-2px]" />
               <span>{bullet.replace(/^•\s*/, "")}</span>
@@ -91,7 +91,6 @@ export default function DressCodeSection({ lang }: DressCodeSectionProps) {
           <h2 className="font-serif italic font-light text-5xl sm:text-6xl text-brand-charcoal mt-4">
             {t.title}
           </h2>
-          <div className="w-16 h-px bg-brand-gold mt-8" />
           <p className="font-serif italic text-base sm:text-lg text-brand-olive mt-8 max-w-md leading-relaxed">
             {t.subtitle}
           </p>

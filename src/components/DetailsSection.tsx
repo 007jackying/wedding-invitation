@@ -110,7 +110,6 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
           <h2 className="font-serif italic font-light text-5xl sm:text-6xl text-brand-charcoal mt-4">
             {t.title}
           </h2>
-          <div className="w-16 h-px bg-brand-gold mt-8" />
         </div>
 
         {/* Programma / Venue spread */}
@@ -169,7 +168,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
               {t.cards.where.venueVal}
             </p>
 
-            <div className="border-t border-brand-charcoal/15 pt-6">
+            <div className="pt-6">
               <h4 className="text-[11px] font-sans font-semibold tracking-[0.3em] uppercase text-brand-olive mb-3">
                 {t.cards.where.addressLabel}
               </h4>
