@@ -2,8 +2,9 @@ import { motion } from "motion/react";
 import { ChevronDown } from "lucide-react";
 import { track } from "@vercel/analytics";
 import { translations } from "../translations";
-import CountdownTimer, { TARGET_DATE } from "./CountdownTimer";
+import CountdownTimer from "./CountdownTimer";
 import BackgroundSlideshow from "./BackgroundSlideshow";
+import Stardust from "./Stardust";
 import RSVPSummary, { NeedInvite } from "./RSVPSummary";
 import { RSVPFormData } from "../types";
 
@@ -15,142 +16,108 @@ interface HeroSectionProps {
   onAttendClick: () => void;
 }
 
-// The date, split into parts for the numeral lockup. Formatted in Kuala Lumpur
-// time so a guest reading from another timezone still sees the wedding day
-// rather than their own local rollover, and derived from the countdown's target
-// so there is one date in the codebase, not two.
-const [DD, MM, YYYY] = new Intl.DateTimeFormat("en-GB", {
-  timeZone: "Asia/Kuala_Lumpur",
-  day: "2-digit",
-  month: "2-digit",
-  year: "numeric",
-})
-  .format(new Date(TARGET_DATE))
-  .split("/");
-
-// Entrance: one settling sequence, not an effect per element.
-const rise = (delay: number) => ({
-  initial: { opacity: 0, y: 14 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] as const },
-});
-
 export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: HeroSectionProps) {
   const t = translations[lang].hero;
   const tRsvp = translations[lang].rsvp;
 
-  // Day-first reads as the date in Malaysia; Chinese convention runs year-first.
-  const dateParts = lang === "cn" ? [YYYY, MM, DD] : [DD, MM, YYYY];
-
-  // The venue half of "January 2, 2027 • Chuai Heng Banquet Hall, Kuala Lumpur" —
-  // the date half is the numeral lockup above it. If the copy ever loses its
-  // bullet, pop() hands back the whole string, which still reads correctly.
-  // Hall and city are set on their own lines so the break never lands inside
-  // the venue's name; a venue with no comma just renders as one line.
-  const [venueName, ...venueRest] = t.datePlace.split("•").pop()!.trim().split(",");
-  const venueCity = venueRest.join(",").trim();
-
   const scrollToNext = () => {
     track("Hero Scroll Clicked");
-    document.getElementById("details")?.scrollIntoView({ behavior: "smooth" });
+    const nextSection = document.getElementById("details");
+    if (nextSection) {
+      nextSection.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   return (
-    <section id="hero" className="relative w-full flex flex-col lg:flex-row lg:min-h-[100svh]">
-      {/* The photograph, mounted on the sand rather than bled behind the type.
-          Held at its native 3:2 so nothing is cropped away — the couple, the car
-          and the drape all survive at every width. */}
-      <div className="relative w-full aspect-[3/2] overflow-hidden lg:order-2 lg:w-[54%] lg:self-center">
-        <BackgroundSlideshow lang={lang} />
-      </div>
+    <section
+      id="hero"
+      /* min-h rather than a fixed h: the reply summary card is taller than the
+         button it replaces, and a locked height clips it on short viewports. */
+      className="relative min-h-[100svh] w-full flex flex-col overflow-hidden"
+    >
+      <BackgroundSlideshow />
+      <Stardust />
 
-      {/* Type block on the sand ground. Left-aligned with a hard rag: this is the
-          card stock the photograph sits on, not a caption under a picture. */}
-      <div className="relative flex flex-col justify-center lg:order-1 lg:w-[46%] px-6 sm:px-10 lg:px-12 xl:px-16 py-12 sm:py-14 lg:py-10">
+      <div className="relative flex-1 flex flex-col min-h-0">
+      {/* Staggered letterpress name composition */}
+      <div className="relative z-10 flex-1 flex flex-col justify-center items-center text-center w-full max-w-6xl mx-auto px-8 sm:px-14 min-h-0">
         <motion.p
-          {...rise(0.15)}
-          className="font-sans font-semibold uppercase tracking-[0.35em] text-[11px] sm:text-xs text-brand-accent"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+          className="text-brand-cream/90 font-sans font-semibold uppercase tracking-[0.35em] text-[11px] sm:text-sm mb-4 text-shadow-md"
         >
           {t.weAreMarried}
         </motion.p>
 
-        {/* The connector trails the first name so both names hang off the same
-            left axis — an indented second line reads as a mistake, not a lockup. */}
         <motion.h1
-          {...rise(0.3)}
-          className="mt-4 font-script font-normal text-brand-charcoal text-[clamp(4.25rem,10vw,6.25rem)] leading-[0.86]"
+          initial={{ opacity: 0, y: 28 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.3, delay: 0.7, ease: "easeOut" }}
+          className="font-script font-normal text-brand-cream text-[clamp(4rem,14vw,9rem)] leading-[0.85] text-shadow-strong"
         >
-          <span className="block">
-            Eva
-            <span className="font-serif not-italic font-light text-[0.34em] text-brand-accent ml-[0.18em] align-[0.32em]">
-              {lang === "cn" ? "与" : "&"}
-            </span>
+          <span className="block">Eva</span>
+          {/* Own line so both names centre on the same axis */}
+          <span className="block font-serif italic font-light text-[0.3em] leading-[1.5] text-brand-blush/90">
+            {lang === "cn" ? "与" : "&"}
           </span>
           <span className="block">Vincent</span>
         </motion.h1>
 
         <motion.p
-          {...rise(0.45)}
-          className="mt-4 font-serif italic text-brand-olive text-lg sm:text-xl"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, delay: 1.4 }}
+          className="mt-6 font-serif italic text-brand-cream/85 text-lg sm:text-2xl tracking-wide text-shadow-md"
         >
           {t.saveDate}
         </motion.p>
 
-        {/* The particulars. The numerals are the loudest thing in the block on
-            purpose — the script says who, these say when. */}
-        <motion.div {...rise(0.6)} className="mt-6">
-          <div className="w-14 h-px bg-brand-gold" />
-          <p className="mt-4 font-serif text-brand-charcoal tabular-nums text-3xl sm:text-4xl lg:text-[2.5rem] leading-none tracking-[0.06em]">
-            {dateParts.map((part, i) => (
-              <span key={i}>
-                {i > 0 && <span className="text-brand-rose mx-2 sm:mx-2.5">·</span>}
-                {part}
-              </span>
-            ))}
-          </p>
-          <p className="mt-4 font-sans font-semibold uppercase tracking-[0.2em] text-[11px] sm:text-xs text-brand-olive leading-[1.7]">
-            {venueName}
-            {venueCity && (
-              <>
-                <br />
-                {venueCity}
-              </>
-            )}
-          </p>
-        </motion.div>
-
-        <motion.div {...rise(0.75)} className="mt-6">
-          <CountdownTimer lang={lang} tone="light" />
-
-          <div className="mt-6">
-            {myRSVP ? (
-              <RSVPSummary rsvp={myRSVP} lang={lang} tone="light" />
-            ) : !canRSVP ? (
-              <NeedInvite lang={lang} tone="light" />
-            ) : (
-              <button
-                type="button"
-                onClick={onAttendClick}
-                className="px-9 py-4 bg-brand-accent text-brand-cream hover:bg-brand-charcoal transition-colors duration-300 font-sans font-semibold text-xs sm:text-sm tracking-[0.25em] uppercase cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 focus:ring-offset-brand-cream"
-              >
-                {tRsvp.accept}
-              </button>
-            )}
-          </div>
-        </motion.div>
-
-        <motion.button
-          id="scroll-arrow"
-          {...rise(1)}
-          onClick={scrollToNext}
-          className="mt-7 -ml-2 self-start flex items-center gap-2 px-2 py-2 text-brand-olive hover:text-brand-accent transition-colors cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-brand-accent"
-          aria-label="Scroll to event details"
+        {/* Date, venue & countdown sit with the save-the-date line rather than
+            in a separate band at the foot of the hero. */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 1.7, ease: "easeOut" }}
+          className="mt-5 flex flex-col items-center gap-3"
         >
-          <span className="font-sans font-semibold text-[11px] tracking-[0.25em] uppercase">
-            {t.scrollText}
-          </span>
-          <ChevronDown className="w-4 h-4 animate-bounce" />
-        </motion.button>
+          <div className="w-16 h-px bg-brand-gold/80" />
+          <p className="text-brand-cream font-sans font-medium tracking-[0.15em] sm:tracking-[0.25em] uppercase text-xs sm:text-sm text-shadow-sm max-w-full">
+            {t.datePlace}
+          </p>
+          <CountdownTimer lang={lang} />
+
+          {myRSVP ? (
+            <RSVPSummary rsvp={myRSVP} lang={lang} />
+          ) : !canRSVP ? (
+            <NeedInvite lang={lang} />
+          ) : (
+            <button
+              type="button"
+              onClick={onAttendClick}
+              className="mt-1 px-8 py-3.5 bg-brand-accent text-brand-cream hover:bg-brand-cream hover:text-brand-charcoal transition-colors duration-300 font-sans font-semibold text-xs sm:text-sm tracking-[0.25em] uppercase cursor-pointer rounded-full focus:outline-none focus:ring-2 focus:ring-brand-gold focus:ring-offset-2 focus:ring-offset-black/40"
+            >
+              {tRsvp.accept}
+            </button>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Scroll cue */}
+      <motion.button
+        id="scroll-arrow"
+        onClick={scrollToNext}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2, duration: 1 }}
+        className="relative z-10 self-center mb-4 px-4 py-2 flex flex-col items-center gap-1 text-brand-cream/80 hover:text-brand-cream transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-cream/60 rounded-full"
+        aria-label="Scroll to event details"
+      >
+        <span className="font-sans font-semibold text-[11px] tracking-[0.25em] uppercase text-shadow-sm">
+          {t.scrollText}
+        </span>
+        <ChevronDown className="w-5 h-5 animate-bounce" />
+      </motion.button>
       </div>
     </section>
   );

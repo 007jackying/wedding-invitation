@@ -202,7 +202,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
           </div>
         </div>
 
-        {/* Postcard from the venue */}
+        {/* Postcard from the venue
         <motion.figure
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -246,7 +246,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
               ))}
             </span>
           </figcaption>
-        </motion.figure>
+        </motion.figure> */}
 
         {/* RSVP band */}
         <motion.div
@@ -279,7 +279,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
         </motion.div>
       </motion.div>
 
-      {/* Full screen photo overlay */}
+      {/* Full screen photo overlay
       <AnimatePresence>
         {isLandscapeOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-brand-charcoal/90 backdrop-blur-md">
@@ -355,7 +355,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
             </motion.div>
           </div>
         )}
-      </AnimatePresence>
+      </AnimatePresence> */}
     </section>
   );
 }

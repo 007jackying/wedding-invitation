@@ -3,24 +3,7 @@ import { translations } from "../translations";
 
 interface CountdownTimerProps {
   lang: "en" | "cn";
-  /** "light" for the sand ground, "dark" for cream type over a photo. */
-  tone?: "light" | "dark";
 }
-
-const TONES = {
-  light: {
-    row: "justify-start",
-    value: "text-brand-charcoal",
-    label: "text-brand-olive",
-    done: "text-brand-accent",
-  },
-  dark: {
-    row: "justify-center",
-    value: "text-brand-cream text-shadow-md",
-    label: "text-brand-cream/70 text-shadow-sm",
-    done: "text-brand-cream text-shadow-md",
-  },
-};
 
 interface TimeRemaining {
   days: number;
@@ -31,7 +14,7 @@ interface TimeRemaining {
 }
 
 // Wedding Day Target: January 2, 2027 at 6:00 PM (Photo Session start) Kuala Lumpur time (UTC+8, no DST)
-export const TARGET_DATE = "2027-01-02T18:00:00+08:00";
+const TARGET_DATE = "2027-01-02T18:00:00+08:00";
 
 function calculateTimeRemaining(): TimeRemaining {
   const difference = new Date(TARGET_DATE).getTime() - Date.now();
@@ -49,9 +32,8 @@ function calculateTimeRemaining(): TimeRemaining {
   };
 }
 
-export default function CountdownTimer({ lang, tone = "dark" }: CountdownTimerProps) {
+export default function CountdownTimer({ lang }: CountdownTimerProps) {
   const t = translations[lang].hero;
-  const c = TONES[tone];
   const [timeLeft, setTimeLeft] = useState<TimeRemaining>(calculateTimeRemaining());
 
   useEffect(() => {
@@ -68,7 +50,7 @@ export default function CountdownTimer({ lang, tone = "dark" }: CountdownTimerPr
 
   if (timeLeft.isCompleted) {
     return (
-      <span className={`font-serif italic text-base sm:text-lg ${c.done}`}>
+      <span className="font-serif italic text-brand-cream text-base sm:text-lg text-shadow-md">
         {t.countdownCelebrating}
       </span>
     );
@@ -82,19 +64,13 @@ export default function CountdownTimer({ lang, tone = "dark" }: CountdownTimerPr
   ];
 
   return (
-    <div
-      className={`flex flex-wrap items-baseline gap-x-3 gap-y-1 sm:gap-x-5 ${c.row}`}
-      role="timer"
-      aria-label={t.datePlace}
-    >
+    <div className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 sm:gap-x-5" role="timer" aria-label={t.datePlace}>
       {timeUnits.map((unit) => (
         <div key={unit.label} className="flex items-baseline gap-1.5">
-          <span className={`font-serif text-xl sm:text-2xl tabular-nums ${c.value}`}>
+          <span className="font-serif text-xl sm:text-3xl text-brand-cream tabular-nums text-shadow-md">
             {String(unit.value).padStart(2, "0")}
           </span>
-          <span
-            className={`text-[9px] sm:text-[10px] font-sans font-semibold tracking-[0.2em] uppercase ${c.label}`}
-          >
+          <span className="text-[9px] sm:text-xs font-sans font-semibold tracking-[0.2em] uppercase text-brand-cream/70 text-shadow-sm">
             {unit.label}
           </span>
         </div>

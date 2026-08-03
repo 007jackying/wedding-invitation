@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 const SLIDESHOW_IMAGES = ["/photos/first.jpeg"]
-export default function BackgroundSlideshow({ lang = "en" }: { lang?: "en" | "cn" }) {
+
+export default function BackgroundSlideshow() {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
@@ -15,9 +16,7 @@ export default function BackgroundSlideshow({ lang = "en" }: { lang?: "en" | "cn
   return (
     <div className="absolute inset-0 w-full h-full z-0 overflow-hidden pointer-events-none select-none">
       {/* Slideshow Core */}
-      {/* initial={false}: the first photo is the largest thing on the page, so it
-          paints at once instead of fading up over 2.5s. Later slides still cross-fade. */}
-      <AnimatePresence mode="popLayout" initial={false}>
+      <AnimatePresence mode="popLayout">
         <motion.div
           key={index}
           initial={{ opacity: 0, scale: 1.05 }}
@@ -28,18 +27,15 @@ export default function BackgroundSlideshow({ lang = "en" }: { lang?: "en" | "cn
         >
           <img
             src={SLIDESHOW_IMAGES[index]}
-            alt={lang === "cn" ? "Eva 与 Vincent 的婚纱照" : "Eva and Vincent on their wedding day"}
-            /* Framed at 3:2 by the hero, so there is nothing to crop. object-position
-               only matters if a later photo lands in a narrower frame — it holds the
-               couple, who sit centre-right and slightly above the midline. */
-            className="w-full h-full object-cover object-[55%_38%]"
+            alt="Wedding scenery background"
+            className="w-full h-full object-cover"
             fetchPriority="high"
             referrerPolicy="no-referrer"
           />
         </motion.div>
       </AnimatePresence>
-      {/* ponytail: no scrim or filter — the photograph runs clean, and no type
-          sits on it, so nothing needs protecting. */}
+      {/* ponytail: no scrim or filter — photos run clean. Hero type rests on the
+          .text-shadow-* helpers alone; add one gradient back if a photo goes pale. */}
     </div>
   );
 }

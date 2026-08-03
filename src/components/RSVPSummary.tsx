@@ -3,43 +3,10 @@ import { track } from "@vercel/analytics";
 import { CONTACTS, RSVPFormData } from "../types";
 import { translations } from "../translations";
 
-type Tone = "light" | "dark";
-
 interface RSVPSummaryProps {
   rsvp: RSVPFormData;
   lang: "en" | "cn";
-  /** "dark" over a photo or the charcoal reply band; "light" on the sand ground. */
-  tone?: Tone;
 }
-
-// The card appears on two grounds now — the sand hero column and the charcoal
-// reply band — so every colour it uses is picked per ground rather than assumed.
-const TONES: Record<Tone, Record<string, string>> = {
-  dark: {
-    card: "mx-auto max-w-xs rounded-2xl border border-brand-gold/40 bg-black/40 backdrop-blur-sm px-5 py-4 text-center",
-    yes: "bg-brand-gold text-brand-charcoal",
-    no: "bg-brand-cream/25 text-brand-cream",
-    status: "text-brand-cream",
-    name: "text-brand-cream",
-    meta: "text-brand-cream/70",
-    hint: "text-brand-cream/60",
-    body: "text-brand-cream/70",
-    pill: "border-brand-gold/40 text-brand-cream hover:bg-brand-cream/10 hover:border-brand-gold focus:ring-brand-gold/60",
-    row: "justify-center",
-  },
-  light: {
-    card: "max-w-sm rounded-2xl border border-brand-rose/25 bg-white px-5 py-4 shadow-xs",
-    yes: "bg-brand-accent text-brand-cream",
-    no: "bg-brand-charcoal/15 text-brand-charcoal",
-    status: "text-brand-charcoal",
-    name: "text-brand-charcoal",
-    meta: "text-brand-olive",
-    hint: "text-brand-olive",
-    body: "text-brand-charcoal/75",
-    pill: "border-brand-rose/30 text-brand-charcoal hover:bg-brand-blush/50 hover:border-brand-rose focus:ring-brand-rose/50",
-    row: "justify-start",
-  },
-};
 
 // lucide ships no brand marks and there's no icon package installed, so the
 // WhatsApp glyph is inlined here — it isn't used anywhere else.
@@ -53,18 +20,17 @@ function WhatsAppIcon({ className }: { className?: string }) {
 
 // Shown in place of the RSVP button once this device has replied. Both places
 // it appears (hero photo, details band) are dark grounds, so there's one variant.
-export default function RSVPSummary({ rsvp, lang, tone = "dark" }: RSVPSummaryProps) {
+export default function RSVPSummary({ rsvp, lang }: RSVPSummaryProps) {
   const t = translations[lang].rsvp;
-  const c = TONES[tone];
   const countLabel = rsvp.guestCount === 1 ? t.guest : t.guests;
   const diet = rsvp.dietChoice === "vegetarian" ? t.vegetarian : t.standard;
 
   return (
-    <div className={`w-full ${c.card}`}>
-      <div className={`flex items-center gap-2 ${c.row}`}>
+    <div className="w-full max-w-xs mx-auto rounded-2xl border border-brand-gold/40 bg-black/40 backdrop-blur-sm px-5 py-4 text-center">
+      <div className="flex items-center justify-center gap-2">
         <span
           className={`flex items-center justify-center w-5 h-5 rounded-full shrink-0 ${
-            rsvp.attending ? c.yes : c.no
+            rsvp.attending ? "bg-brand-gold text-brand-charcoal" : "bg-brand-cream/25 text-brand-cream"
           }`}
         >
           {rsvp.attending ? (
@@ -73,29 +39,28 @@ export default function RSVPSummary({ rsvp, lang, tone = "dark" }: RSVPSummaryPr
             <X className="w-3 h-3 stroke-[3]" />
           )}
         </span>
-        <span className={`font-sans font-semibold text-[11px] tracking-[0.18em] uppercase ${c.status}`}>
+        <span className="font-sans font-semibold text-[11px] tracking-[0.18em] uppercase text-brand-cream">
           {rsvp.attending ? t.attending : t.notAttending}
         </span>
       </div>
 
-      <p className={`mt-3 font-serif text-lg leading-tight break-words ${c.name}`}>
+      <p className="mt-3 font-serif text-lg text-brand-cream leading-tight break-words">
         {rsvp.guestName}
       </p>
 
       {rsvp.attending && (
-        <p className={`mt-1 font-sans text-xs tabular-nums ${c.meta}`}>
+        <p className="mt-1 font-sans text-xs text-brand-cream/70 tabular-nums">
           {rsvp.guestCount} {countLabel} · {diet}
         </p>
       )}
 
       {/* Changing a reply goes through the couple directly — there is no
           in-app edit, which also keeps guests from filing a duplicate. */}
-      <p className={`mt-4 font-sans text-[10px] tracking-[0.15em] uppercase ${c.hint}`}>
+      <p className="mt-4 font-sans text-[10px] tracking-[0.15em] uppercase text-brand-cream/60">
         {t.change}
       </p>
       <ContactLinks
         lang={lang}
-        tone={tone}
         message={(name) =>
           lang === "cn"
             ? `${name} 您好，我是 ${rsvp.guestName}，想修改婚礼出席答复。`
@@ -111,15 +76,12 @@ export default function RSVPSummary({ rsvp, lang, tone = "dark" }: RSVPSummaryPr
 function ContactLinks({
   lang,
   message,
-  tone,
 }: {
   lang: "en" | "cn";
   message: (contactName: string) => string;
-  tone: Tone;
 }) {
-  const c = TONES[tone];
   return (
-    <div className={`mt-2 flex flex-wrap gap-2 ${c.row}`}>
+    <div className="mt-2 flex flex-wrap justify-center gap-2">
       {CONTACTS.map((contact) => (
         <a
           key={contact.name}
@@ -132,7 +94,7 @@ function ContactLinks({
               ? `通过 WhatsApp 联系${contact.name}`
               : `Message ${contact.name} on WhatsApp`
           }
-          className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-sans font-semibold text-[11px] tracking-[0.1em] transition-colors focus:outline-none focus:ring-2 ${c.pill}`}
+          className="inline-flex items-center gap-1.5 rounded-full border border-brand-gold/40 px-3 py-1.5 font-sans font-semibold text-[11px] tracking-[0.1em] text-brand-cream hover:bg-brand-cream/10 hover:border-brand-gold transition-colors focus:outline-none focus:ring-2 focus:ring-brand-gold/60"
         >
           <WhatsAppIcon className="w-3.5 h-3.5 text-[#25D366] shrink-0" />
           {contact.name}
@@ -147,21 +109,19 @@ function ContactLinks({
  * `?g=` code. Replying requires a personal invite link, so the only thing to
  * offer is a way to ask the couple for one.
  */
-export function NeedInvite({ lang, tone = "dark" }: { lang: "en" | "cn"; tone?: Tone }) {
+export function NeedInvite({ lang }: { lang: "en" | "cn" }) {
   const t = translations[lang].rsvp;
-  const c = TONES[tone];
 
   return (
-    <div className={`w-full ${c.card}`}>
-      <p className={`font-sans font-semibold text-[11px] tracking-[0.18em] uppercase ${c.status}`}>
+    <div className="w-full max-w-xs mx-auto rounded-2xl border border-brand-gold/40 bg-black/40 backdrop-blur-sm px-5 py-4 text-center">
+      <p className="font-sans font-semibold text-[11px] tracking-[0.18em] uppercase text-brand-cream">
         {t.needInviteTitle}
       </p>
-      <p className={`mt-3 font-sans text-xs leading-relaxed ${c.body}`}>
+      <p className="mt-3 font-sans text-xs text-brand-cream/70 leading-relaxed">
         {t.needInviteBody}
       </p>
       <ContactLinks
         lang={lang}
-        tone={tone}
         message={(name) =>
           lang === "cn"
             ? `${name} 您好，可以把我的婚礼请柬专属链接发给我吗？`

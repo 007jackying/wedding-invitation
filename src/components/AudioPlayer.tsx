@@ -46,10 +46,8 @@ export default function AudioPlayer({ lang }: AudioPlayerProps) {
     }
   }[lang];
 
-  // Bottom-right: the top-left corner is the hero's type column now, and the
-  // language switcher owns the top-right.
   return (
-    <div className="fixed bottom-6 right-5 sm:bottom-10 sm:right-10 z-50 flex items-center gap-2">
+    <div className="fixed top-10 left-5 sm:top-16 sm:left-10 z-50 flex items-center gap-2">
       {/* Hidden audio element */}
       <audio
         ref={audioRef}
