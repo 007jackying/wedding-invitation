@@ -45,7 +45,7 @@ export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: He
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
-          className="text-brand-cream/90 font-sans font-semibold uppercase tracking-[0.35em] text-[11px] sm:text-sm mb-4 text-shadow-md"
+          className="text-brand-cream/90 font-sans font-semibold uppercase tracking-[0.35em] text-[25px] sm:text-[30px] mb-10 text-shadow-md"
         >
           {t.weAreMarried}
         </motion.p>
