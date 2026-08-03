@@ -68,7 +68,7 @@ export default function HeroSection({ lang, myRSVP, canRSVP, onAttendClick }: He
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, delay: 1.4 }}
-          className="mt-6 font-serif italic text-brand-cream/85 text-lg sm:text-2xl tracking-wide text-shadow-md"
+          className="mt-6 font-serif italic text-brand-cream/85 text-lg sm:text-2xl tracking-wide text-shadow-strong"
         >
           {t.saveDate}
         </motion.p>
