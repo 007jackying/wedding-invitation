@@ -7,12 +7,26 @@ Welcome to the **Owner & Admin User Guide**! This guide covers everything you ne
 
 ## 🔒 1. How to Access the Admin Dashboard
 
-Access your private owner dashboard by appending `#admin` to your website URL in the address bar 'https://evavincentwedding.recursivedreamlabs.com/#97+97=0201/admin'.
+Your dashboard has no link anywhere on the website — you reach it by typing the
+address yourself. Paste this into the address bar and bookmark it:
+
+```
+https://evavincentwedding.recursivedreamlabs.com/#97+97=0201/admin
+```
+
+The `#97+97=0201/admin` part matters exactly as written; a plain `#admin` will
+just show the normal invitation.
 
 ### Authentication
 - When prompted, enter your **6-Digit Security PIN**.
 - Click **Show Pin** to verify your entry if needed.
 - Upon successful verification, you'll be welcomed directly into the live dashboard.
+
+> 🔐 **Treat the PIN like a door key, not a safe.** It keeps a curious guest out
+> of the dashboard screen; it does not protect the guest list itself. Don't paste
+> it into this file, the repository, or any chat you'd not want forwarded — this
+> repo is public. If you think it has leaked, change `VITE_ADMIN_PIN` and
+> redeploy; the old one stops working immediately.
 
 ---
 
@@ -30,7 +44,15 @@ Every guest or family party receives their own **personalized invitation link** 
    - **Copies the personal invite link directly to your clipboard**.
 5. Paste the link into **WhatsApp**, WeChat, or SMS and send it directly to your guest!
 
-> 💡 **Tip:** When the guest opens their personal link, the website greets them by name and lets them fill in their party size, phone number, and meal preference.
+> 💡 **Tip:** When the guest opens their personal link and taps **Reply to the
+> Invitation**, the form opens with the name you gave them already filled in —
+> they just add party size, phone number and meal preference. They can correct
+> the name if you spelled it differently to them.
+
+> ⚠️ **The link is the only way to reply.** A guest who opens the site without
+> their `?g=` code sees the invitation but gets a "message us for your link" card
+> instead of the reply button. Always send the personal link, never the bare
+> website address.
 
 ---
 
@@ -58,7 +80,7 @@ You do **not** need to refresh your browser page! The table automatically update
 
 ### Search & Sorting
 - **Search Bar**: Type any name, phone number, or meal preference in the search box to filter instantly.
-- **Column Sorting**: Click any column header (**Guest Name**, **Party Size**, **Phone**, **Diet Choice**, **Registered On**) to sort ascending or descending.
+- **Column Sorting**: Click any column header (**Guest Name**, **Party Size**, **Phone**, **Email**, **Diet Choice**, **Registered On**) to sort ascending or descending.
 
 ### Editing a Guest's Response (On Their Behalf)
 If a guest calls or messages you on WhatsApp to answer or change their RSVP:
@@ -111,5 +133,3 @@ Click the **Wedding Timeline Editor** tab at the top of the dashboard to customi
 
 ---
 *Happy Wedding Planning, Eva & Vincent! 💕*
-170699
-https://evavincentwedding.recursivedreamlabs.com/#97+97=0201/admin

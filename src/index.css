@@ -9,6 +9,15 @@
   /* Brush-script couple name treatment, matches the "We got Married" style reference */
   --font-script: "Alex Brush", cursive;
 
+  /* Fluid spacing scale. Sections used to step between two fixed values at the
+     `sm` breakpoint, which left awkward gaps on everything between a phone and a
+     laptop. These scale continuously with the viewport instead, so there is one
+     rhythm at every width. Named by role, biggest to smallest. */
+  --spacing-section: clamp(3.5rem, 10vw, 8rem);  /* a section's own top/bottom */
+  --spacing-band: clamp(3rem, 8vw, 6rem);        /* between major blocks in a section */
+  --spacing-block: clamp(1.5rem, 4vw, 2.5rem);   /* between related blocks */
+  --spacing-gutter: clamp(1.25rem, 4vw, 2.5rem); /* page side margin */
+
   /* "Tuscan Dream" palette — warm sand canvas, muted olive, rose/blush gold.
      Gold is a decorative metallic and never carries body copy; the contrast
      floor is met by --accent (text) and --charcoal/--olive (everything else). */

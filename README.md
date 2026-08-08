@@ -11,7 +11,20 @@ npm install
 npm run dev
 ```
 
-No API key or `.env` needed — the app only talks to Firestore, and its (non-secret) web config is checked in at `firebase-applet-config.json`.
+The invitation itself needs no setup: the app only talks to Firestore, and its
+(non-secret) web config is checked in at `firebase-applet-config.json`.
+
+**The admin dashboard needs one variable.** `VITE_ADMIN_PIN` is read at *build*
+time, so it must be set before `npm run dev` / `npm run build` or nobody can get
+in (an unset PIN matches nothing):
+
+```bash
+echo 'VITE_ADMIN_PIN=123456' > .env.local   # .env* is gitignored
+```
+
+Never commit the PIN. It ships inside the client bundle either way, so it is a
+speed bump rather than a secret — see the security note under *Admin dashboard*.
+The dev server skips the PIN gate entirely (`import.meta.env.DEV`).
 
 Other scripts:
 - `npm run build` — production build
@@ -27,7 +40,7 @@ Everything is one SPA, switched by URL hash/path — no router library:
 |---|---|
 | English invitation | default, or `#en` / `/en/` |
 | Chinese invitation | `#cn` / `/cn/` |
-| Admin dashboard | `#admin` |
+| Admin dashboard | `#97+97=0201/admin` — an obscure hash, not a secret |
 | A guest's personal invite | `?g=<code>` — combines with the above, e.g. `?g=k3d9x2#cn` |
 
 Language falls back to the browser's `navigator.language` if no explicit hash/path is set.
@@ -47,7 +60,19 @@ who haven't replied are visible as **Invited** rows rather than being absent fro
 
 ## Admin dashboard
 
-Visit `#admin` (or the lock icon in the footer). Gated by a 6-digit PIN defined in `src/types.ts` (`ADMIN_PIN`) — **UI-only gating**, not a security boundary (see `firestore.rules`, currently open read/write). From there you can create invites, copy each guest's link, view/search/sort/edit/delete RSVPs, and edit the event timeline — all synced live via Firestore `onSnapshot`.
+Visit `#97+97=0201/admin` — there is no link to it anywhere in the UI, by design.
+Gated by a 6-digit PIN from `VITE_ADMIN_PIN` (surfaced as `ADMIN_PIN` in
+`src/types.ts`). From there you can create invites, copy each guest's link,
+view/search/sort/edit/delete RSVPs, and edit the event timeline — all synced live
+via Firestore `onSnapshot`. See [ADMIN_GUIDE.md](ADMIN_GUIDE.md) for the
+walkthrough.
+
+> ⚠️ **The PIN is not a security boundary.** It is compiled into the client
+> bundle, and `firestore.rules` currently allows `read, write, delete: if true`
+> for anyone with the project config — which is checked in. So the guest list can
+> be read or wiped straight from the Firestore API without ever loading the
+> dashboard. The PIN only keeps a casual visitor out of the UI. Tightening the
+> rules is the fix; the PIN is not.
 
 ## Data
 
@@ -62,14 +87,31 @@ src/
   types.ts                RSVPFormData, TimelineItem, CONTACTS, ADMIN_PIN
   translations.ts         EN/CN copy
   components/
-    HeroSection.tsx        landing hero + countdown
-    DetailsSection.tsx     timeline, venue, RSVP trigger
+    HeroSection.tsx        photo, names, date + countdown. No reply control —
+                           its text sits in bands anchored to where the couple
+                           are in the photo; see DESIGN.md §1 before editing
+    BackgroundSlideshow.tsx the hero photograph; its object-position is what
+                           keeps that anchoring stable across screen sizes
+    DetailsSection.tsx     timeline, venue, and the only RSVP trigger on the page
     DressCodeSection.tsx
     RSVPModal.tsx           writes the reply back to the guest's invite doc
     RSVPSummary.tsx         the reply shown back to a guest, + the "need a link" card
     AdminDashboard.tsx      PIN-gated invites/guest list + timeline editor
     CalendarButton.tsx      add-to-calendar (.ics)
-    CountdownTimer.tsx
-    AudioPlayer.tsx
-    BackgroundSlideshow.tsx
+    CountdownTimer.tsx      owns TARGET_DATE — the one wedding date in the code
+    AudioPlayer.tsx         autoplays muted; mute choice persists to localStorage
+    Stardust.tsx            drifting gold motes over the hero
+public/
+  photos/first.jpeg         the hero photograph
+  music.mp3                 background track
 ```
+
+## Music
+
+The track autoplays **muted** — browsers only permit autoplay in that state, so
+it is the only version that reliably starts. The guest's mute choice is stored in
+`localStorage` under `wedding.musicMuted` and honoured on their next visit.
+
+A returning guest who chose sound may still have `play()` refused before they
+interact with the page; that rejection is caught and falls back to muted, so the
+icon never claims sound that isn't playing.

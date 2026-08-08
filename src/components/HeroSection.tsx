@@ -78,7 +78,7 @@ export default function HeroSection({ lang }: HeroSectionProps) {
           initial="hidden"
           animate="show"
           variants={RISE_UP}
-          className="absolute inset-x-0 top-0 h-[24%] flex flex-col items-center justify-end px-6 sm:px-14 pb-[1svh]"
+          className="absolute inset-x-0 top-0 h-[24%] flex flex-col items-center justify-end px-gutter pb-[1svh]"
         >
           <motion.p
             variants={line}
@@ -131,7 +131,7 @@ export default function HeroSection({ lang }: HeroSectionProps) {
           initial="hidden"
           animate="show"
           variants={SETTLE_DOWN}
-          className="absolute inset-x-0 top-[66%] bottom-0 flex flex-col items-center gap-[1.2svh] px-6 sm:px-14 pt-[1svh]"
+          className="absolute inset-x-0 top-[66%] bottom-0 flex flex-col items-center gap-[1.2svh] px-gutter pt-[1svh]"
         >
           <motion.p
             variants={line}

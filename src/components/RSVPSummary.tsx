@@ -26,7 +26,7 @@ export default function RSVPSummary({ rsvp, lang }: RSVPSummaryProps) {
   const diet = rsvp.dietChoice === "vegetarian" ? t.vegetarian : t.standard;
 
   return (
-    <div className="w-full max-w-xs mx-auto rounded-2xl border border-brand-gold/40 bg-black/40 backdrop-blur-sm px-5 py-4 text-center">
+    <div className="w-full max-w-xs mx-auto rounded-2xl border border-brand-gold/40 bg-black/40 backdrop-blur-sm px-4 py-3 text-center">
       <div className="flex items-center justify-center gap-2">
         <span
           className={`flex items-center justify-center w-5 h-5 rounded-full shrink-0 ${
@@ -113,11 +113,11 @@ export function NeedInvite({ lang }: { lang: "en" | "cn" }) {
   const t = translations[lang].rsvp;
 
   return (
-    <div className="w-full max-w-xs mx-auto rounded-2xl border border-brand-gold/40 bg-black/40 backdrop-blur-sm px-5 py-4 text-center">
+    <div className="w-full max-w-xs mx-auto rounded-2xl border border-brand-gold/40 bg-black/40 backdrop-blur-sm px-4 py-3 text-center">
       <p className="font-sans font-semibold text-[11px] tracking-[0.18em] uppercase text-brand-cream">
         {t.needInviteTitle}
       </p>
-      <p className="mt-3 font-sans text-xs text-brand-cream/70 leading-relaxed">
+      <p className="mt-2 font-sans text-xs text-brand-cream/70 leading-relaxed">
         {t.needInviteBody}
       </p>
       <ContactLinks

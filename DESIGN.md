@@ -45,27 +45,74 @@ Chinese has no true italics, so `.italic` is forced upright under `[data-lang="c
 ## 1 · Hero
 
 **Background:** full-bleed photograph of the couple (`public/photos/first.jpeg`),
-shown at full opacity with no scrim, gradient or filter, and with no frame — the
-photo reads clean. All text is `brand-cream` over it and relies on the
-`.text-shadow-*` helpers alone for legibility. Gold stardust motes drift behind
-the type.
+dimmed with `brightness-70` **on the image itself** rather than by a scrim
+overlay — one class instead of two stacked divs. No frame, no gradient. All text
+is `brand-cream` over it and leans on the `.text-shadow-*` helpers.
 
 The slideshow machinery is still in place (8s cross-fade); it is simply holding a
 single photo. Add more paths to `SLIDESHOW_IMAGES` and it cycles again.
 
+### Text is anchored to the couple, not to the viewport
+
+This is the one rule to preserve when editing this section. `object-cover`
+re-crops as the viewport ratio changes, which slides the couple up and down
+inside the frame — so text placed at a fixed offset drifts off them. Two things
+hold it together:
+
+1. **`object-position: 50% 30%`** on the image pins the crop. It holds their
+   heads at ~25% of viewport height from a 390px phone to an ultrawide; without
+   it that figure swings by about four points.
+2. **The type sits in absolute bands** measured against that constant:
+
+| Band | Contents |
+|---|---|
+| `0 – 24%` | Sky above their heads → eyebrow + names, bottom-aligned |
+| `24 – 66%` | **Their faces — deliberately empty** |
+| `66 – 100%` | Chest height down → save-the-date, date, countdown, scroll cue |
+
+Measured at rest: names bottom **23%**, save-the-date top **67%**, scroll cue
+bottom **100%**.
+
+> **Do not rebuild these as flex ratios.** It was tried. A flex item cannot
+> shrink below its own content, and Alex Brush declares a line box near 3× its
+> point size, so the eyebrow alone claimed ~137px: the bands came out
+> **265/143/285** instead of **166/319/208** and pushed the type over the faces
+> it was meant to clear. `leading-none` on the eyebrow fixes the line box at the
+> source, and every size below is `min(vw, svh)` so the type stays inside its
+> band on a short landscape phone.
+
 | Element | Font | Size | Weight / treatment | Colour |
 |---|---|---|---|---|
-| "We are married" eyebrow | Inter | 11 → 14px | Semibold, uppercase, `0.35em` tracking | `brand-cream/90` |
-| **Eva / Vincent** | Alex Brush | `clamp(64px, 14vw, 144px)` | Regular, `0.85` line-height | `brand-cream` |
-| "&" connector | Fraunces | `0.3em` of the names (≈19–43px) | Italic light, own line | `brand-blush/90` |
-| "Save our Date" | Fraunces | 18 → 24px | Italic | `brand-cream/85` |
+| "We are married" eyebrow | **Alex Brush** | `clamp(20px, min(4.5vw, 6svh), 56px)` | Light, `0.3em` tracking, `leading-none` | `brand-cream/90` |
+| 我们结婚了 eyebrow (CN) | **Noto Serif SC** | `clamp(16px, min(3.4vw, 4.5svh), 40px)` | Light, `0.25em` tracking, `leading-none` | `brand-cream/90` |
+| **Vincent & Eva** | Alex Brush | `clamp(44px, min(15vw, 16svh), 144px)` | Regular, `0.9` line-height, one line | `brand-cream` |
+| "&" connector | Alex Brush | inherits | `0.2em` margin either side — Alex Brush ends "Vincent" on a swash, and without the air the line reads as one word | `brand-cream` |
+| 囍 connector (CN) | Noto Serif SC | `0.45em` of the names | Raised `0.16em`, `0.3em` left / `0.2em` right; a CJK glyph fills far more of its em box than a script capital, so it is sized optically | `brand-cream` |
+| "Save our Date" | Fraunces | `clamp(17px, 2.2vw, 24px)` | Italic | `brand-cream/85` |
 | Gold rule | — | 64 × 1px | — | `brand-gold/80` |
-| *(no photo frame — the double keyline and corner accents were removed so the photograph reads uncropped)* | — | — | — | — |
 | Date + venue | Inter | 12 → 14px | Medium, uppercase, `0.15em → 0.25em` tracking | `brand-cream` |
 | Countdown numbers | Fraunces | 20 → 30px | Tabular figures | `brand-cream` |
 | Countdown labels | Inter | 9 → 12px | Semibold, uppercase, `0.2em` tracking | `brand-cream/70` |
-| "Reply to the Invitation" button | Inter | 12 → 14px | Semibold, uppercase, `0.25em` tracking | `brand-cream` on `brand-accent`, pill |
 | "Scroll" cue | Inter | 11px | Semibold, uppercase, `0.25em` tracking | `brand-cream/80` |
+
+The hero carries **no reply control**. The RSVP button, the reply summary and the
+"need a link" card all live in the Details band (§2) — the hero is the
+photograph and the date, and the scroll cue is the handoff.
+
+### Entrance
+
+Both bands start converged near the middle of the frame and split outward to
+their resting positions over ~1.7s, each line inside them resolving on its own
+beat behind it. The travel is set in `vh` (`+34vh` down for the top band, `-28vh`
+up for the bottom) so it is a share of the screen — the same gesture on a phone
+and on a desktop, rather than a fixed distance that reads as a twitch on one and
+a lurch on the other.
+
+Because that is a screen-height slide, `main.tsx` wraps the app in
+`<MotionConfig reducedMotion="user">`. The `prefers-reduced-motion` block in
+`index.css` only reaches CSS animations; Motion drives its own in JS and ignored
+the preference entirely without it. With it, the fades stay and the movement is
+dropped.
 
 ## 2 · Details
 
@@ -149,9 +196,13 @@ the blue linework on the sand card.
 
 ## 7 · "Your reply" card
 
-Replaces the reply button once this device has already replied. Appears in the
-hero and in the details band — both dark grounds, so it uses one style:
-`black/40` blurred fill with a `brand-gold/40` border. There is no in-app edit;
+Replaces the reply button once the guest has answered. It appears in one place —
+the charcoal reply band in Details — so it has a single dark style: `black/40`
+blurred fill with a `brand-gold/40` border. The same treatment serves
+`NeedInvite`, the card shown to a visitor with no valid `?g=` code.
+
+The answer is read from Firestore by invite code, not from this device, so a
+guest sees it on any phone they open their link on. There is no in-app edit;
 guests who need to change something message the couple on WhatsApp instead.
 
 | Element | Font | Size | Weight / treatment | Colour |
@@ -188,11 +239,16 @@ guests who need to change something message the couple on WhatsApp instead.
   corner accents and stardust are all it carries.
 - `brand-rose` clears the 3:1 bar for icons and non-text graphics but not for
   body copy; small text uses `brand-accent`, `brand-charcoal` or `brand-olive`.
-- Everything honours `prefers-reduced-motion`: the stardust drift, the entrance
-  animations and smooth scrolling all stop.
-- Hero type sits on an unscrimmed photograph, so legibility rests entirely on the
-  `.text-shadow-sm / -md / -lg / -strong` helpers in `src/index.css`. Any new hero
-  photo has to be checked against the cream type before it goes in.
+- Everything honours `prefers-reduced-motion`. Two mechanisms are needed and both
+  must stay: the `@media` block in `index.css` covers CSS animations (stardust
+  drift, smooth scrolling), and `<MotionConfig reducedMotion="user">` in
+  `main.tsx` covers Motion's JS-driven ones, including the hero's screen-height
+  entrance. The CSS block alone does **not** reach Motion.
+- Hero type sits on a photograph dimmed only by `brightness-70`, so legibility
+  rests on that plus the `.text-shadow-sm / -md / -lg / -strong` helpers in
+  `src/index.css`. **Any new hero photo has to be checked against the cream type
+  before it goes in** — and against the band boundaries in §1, which are measured
+  from where the couple sit in the current photo.
 
 ## 9 · Dashboard duplicate warnings
 
