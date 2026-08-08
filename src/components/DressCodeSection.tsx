@@ -76,10 +76,9 @@ export default function DressCodeSection({ lang }: DressCodeSectionProps) {
         />
 
         {/* Statement, held between two gold rules like the printed panel */}
-        <p className="mt-band border-x border-brand-gold/50 bg-brand-cream/50 px-gutter py-block text-center font-serif italic font-light text-base sm:text-lg leading-relaxed text-brand-charcoal">
+        <p className="mt-band border-x border-brand-gold/50 bg-brand-gold/15 px-gutter py-block text-center font-serif italic text-base sm:text-lg leading-relaxed text-brand-charcoal">
           {t.statement}
         </p>
-
         <div className="mt-band grid grid-cols-2 gap-gutter divide-x divide-brand-charcoal/15">
           {([t.ladies, t.gentlemen] as const).map((side) => (
             <div key={side.label} className="px-2 sm:px-6 text-center">
