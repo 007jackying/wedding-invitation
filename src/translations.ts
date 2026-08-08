@@ -38,7 +38,6 @@ export interface TranslationSchema {
         title: string;
         venueLabel: string;
         venueVal: string;
-        addressLabel: string;
         addressVal: string;
         mapLink: string;
         wazeLink: string;
@@ -148,7 +147,6 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
           title: "Where",
           venueLabel: "Venue",
           venueVal: "Chuai Heng Banquet Hall",
-          addressLabel: "Address",
           addressVal: "20, Jalan Kampung, Imbi, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur",
           mapLink: "View on Google Maps →",
           wazeLink: "View on Waze →",
@@ -257,7 +255,6 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
           title: "婚礼场地",
           venueLabel: "场地",
           venueVal: "翠恒酒家（宴会厅）",
-          addressLabel: "地址",
           addressVal: "20, Jalan Kampung, Imbi, 55100 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur",
           mapLink: "在谷歌地图中查看 →",
           wazeLink: "在 Waze 中查看 →",

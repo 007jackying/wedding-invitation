@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, type SVGProps } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, ChevronLeft, ChevronRight, Users, HeartHandshake, UtensilsCrossed, PartyPopper } from "lucide-react";
 import { track } from "@vercel/analytics";
@@ -10,6 +10,71 @@ import RSVPSummary, { NeedInvite } from "./RSVPSummary";
 
 // ponytail: cycled by index rather than matched to each label's meaning — holds up for any timeline length
 const TIMELINE_ICONS = [Users, HeartHandshake, UtensilsCrossed, PartyPopper];
+
+// One spray, drawn for the top-left, then flipped into the other three. Mirroring
+// costs a transform; four hand-drawn corners would cost four sets of path data.
+const CORNERS = [
+  "-top-1 -left-1",
+  "-top-1 -right-1 -scale-x-100",
+  "-bottom-1 -left-1 -scale-y-100",
+  "-bottom-1 -right-1 -scale-100",
+];
+
+// Leaves and blooms are each drawn once in <defs> and stamped with <use>, so the
+// arrangement below is just a placement table — nudge a number to move a leaf.
+// [x, y, rotation, scale]
+const LEAVES: [number, number, number, number][] = [
+  [18, 8, -50, 0.5], [21, 10, 40, 0.45],
+  [34, 11, -38, 0.6], [37, 14, 48, 0.52],
+  [53, 18, -25, 0.58], [56, 21, 58, 0.5],
+  [70, 24, -14, 0.46],
+  // The left-edge stem is the top stem mirrored across the diagonal: swap x/y and
+  // take 90° minus the angle.
+  [8, 18, 140, 0.5], [10, 21, 50, 0.45],
+  [11, 34, 128, 0.6], [14, 37, 42, 0.52],
+  [18, 53, 115, 0.58], [21, 56, 32, 0.5],
+  [24, 70, 104, 0.46],
+];
+
+// Sparse and small on purpose: the reference card is mostly foliage, with blooms
+// as punctuation. Scaling these up is what makes it read as clip art.
+const BLOOMS: [number, number, number][] = [
+  [16, 16, 0.78], [45, 15, 0.66], [15, 45, 0.66], [72, 26, 0.48], [26, 72, 0.48],
+];
+
+function FloralCorner({ className }: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 120 120" className={className} fill="none">
+      <defs>
+        <path id="petal-leaf" d="M0,0 C5,-6 15,-7 22,0 C15,7 5,6 0,0 Z" />
+        <g id="petal-bloom">
+          {[0, 72, 144, 216, 288].map((a) => (
+            <ellipse key={a} cx="4.6" cy="0" rx="3.4" ry="2.1" transform={`rotate(${a})`} />
+          ))}
+          <circle r="1.9" className="fill-brand-rose/70" />
+        </g>
+      </defs>
+
+      {/* Two stems curving away from the corner, one along each edge */}
+      <g className="stroke-brand-gold/70" strokeWidth="1.1" strokeLinecap="round">
+        <path d="M4,10 C30,4 55,10 78,26" />
+        <path d="M10,4 C4,30 10,55 26,78" />
+      </g>
+
+      <g className="fill-brand-olive/40">
+        {LEAVES.map(([x, y, r, s]) => (
+          <use key={`${x}-${y}`} href="#petal-leaf" transform={`translate(${x} ${y}) rotate(${r}) scale(${s})`} />
+        ))}
+      </g>
+
+      <g className="fill-brand-gold/75">
+        {BLOOMS.map(([x, y, s]) => (
+          <use key={`${x}-${y}`} href="#petal-bloom" transform={`translate(${x} ${y}) scale(${s})`} />
+        ))}
+      </g>
+    </svg>
+  );
+}
 
 const CAROUSEL_PHOTOS = [
   {
@@ -94,7 +159,18 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
   const photoLocation = lang === "cn" ? currentPhoto.locationCn : currentPhoto.locationEn;
 
   return (
-    <section id="details" className="relative w-full px-6 sm:px-10 py-24 sm:py-32">
+    <section id="details" className="relative w-full px-6 sm:px-10 pt-12 sm:pt-16 pb-24 sm:pb-32">
+      {/* Double gold rule with a botanical spray in each corner, as on the printed
+          card. Drawn, not photographed — so it recolours with the tokens and stays
+          crisp at any size. */}
+      <div className="absolute inset-3 sm:inset-6 pointer-events-none" aria-hidden="true">
+        <div className="absolute inset-0 border border-brand-gold/60" />
+        <div className="absolute inset-2 border border-brand-gold/35" />
+        {CORNERS.map((corner) => (
+          <FloralCorner key={corner} className={`absolute w-20 sm:w-32 ${corner}`} />
+        ))}
+      </div>
+
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -103,11 +179,12 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
         className="max-w-5xl mx-auto"
       >
         {/* Editorial section heading */}
-        <div className="mb-16 sm:mb-20">
+        <div className="mb-8 sm:mb-10">
           <span className="text-[11px] sm:text-xs tracking-[0.35em] text-brand-accent uppercase font-sans font-semibold">
             {t.joinCelebration}
           </span>
-          <h2 className="font-serif italic font-light text-5xl sm:text-6xl text-brand-charcoal mt-4">
+          {/* ponytail: clamp + nowrap keeps it one row from 320px up, no breakpoint ladder */}
+          <h2 className="font-serif italic font-light whitespace-nowrap text-[clamp(1.75rem,8vw,3.75rem)] text-brand-charcoal mt-4">
             {t.title}
           </h2>
         </div>
@@ -164,14 +241,11 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
             <h3 className="text-[11px] font-sans font-semibold tracking-[0.3em] uppercase text-brand-olive mb-2">
               {t.cards.where.venueLabel}
             </h3>
-            <p className="font-serif text-2xl sm:text-3xl text-brand-charcoal mb-8">
+            <p className="font-serif text-2xl sm:text-3xl text-brand-charcoal mb-3">
               {t.cards.where.venueVal}
             </p>
 
-            <div className="pt-6">
-              <h4 className="text-[11px] font-sans font-semibold tracking-[0.3em] uppercase text-brand-olive mb-3">
-                {t.cards.where.addressLabel}
-              </h4>
+            <div>
               <p className="font-sans text-sm sm:text-base font-light text-brand-charcoal/90 leading-relaxed">
                 20, Jalan Kampung, Imbi,<br />
                 55100 Kuala Lumpur,<br />
