@@ -1,3 +1,10 @@
+interface DressCodeSide {
+  label: string;
+  sublabel: string;
+  attire: string;
+  note: string;
+}
+
 export interface TranslationSchema {
   hero: {
     saveDate: string;
@@ -45,23 +52,13 @@ export interface TranslationSchema {
     };
   };
   dressCode: {
-    aesthetic: string;
     title: string;
     subtitle: string;
-    ladies: {
-      title: string;
-      desc: string;
-      bullet1: string;
-      bullet2: string;
-      bullet3: string;
-    };
-    gentlemen: {
-      title: string;
-      desc: string;
-      bullet1: string;
-      bullet2: string;
-      bullet3: string;
-    };
+    ladies: DressCodeSide;
+    gentlemen: DressCodeSide;
+    statement: string;
+    colorNote: string;
+    illustrationAlt: string;
   };
   rsvp: {
     accept: string;
@@ -154,23 +151,25 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
       },
     },
     dressCode: {
-      aesthetic: "The Aesthetic",
       title: "Dress Code",
-      subtitle: '"Formal & Elegant — We look forward to celebrating in style with you."',
+      subtitle: "服装要求",
       ladies: {
-        title: "Ladies",
-        desc: "We invite you to wear elegant floor-length evening gowns or sophisticated midi cocktail dresses.",
-        bullet1: "• Fine fabrics like silk, chiffon, or crepe are highly recommended",
-        bullet2: "• Warm summer tones or elegant pastels blend perfectly with the venue",
-        bullet3: "• Please avoid pure white, ivory, or cream attire",
+        label: "Ladies",
+        sublabel: "女士",
+        attire: "Long Dress",
+        note: "Elegant and comfortable",
       },
       gentlemen: {
-        title: "Gentlemen",
-        desc: "We invite you to wear a formal dark tuxedo or a classic tailored suit with a crisp white shirt.",
-        bullet1: "• Complete your look with a refined necktie or a bow tie",
-        bullet2: "• Oxford shoes or elegant leather loafers are appropriate",
-        bullet3: "• Classic tones such as charcoal, navy blue, or black suit best",
+        label: "Gentlemen",
+        sublabel: "男士",
+        attire: "Shirt",
+        note: "Smart casual",
       },
+      statement:
+        "We look forward to celebrating our special day with you in elegant and appropriate attire.",
+      colorNote: "Colors are welcome — please avoid white attire.",
+      illustrationAlt:
+        "Illustration of two guests in long evening dresses and two in shirts with smart casual trousers",
     },
     rsvp: {
       accept: "Reply to the Invitation",
@@ -262,23 +261,23 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
       },
     },
     dressCode: {
-      aesthetic: "视觉美学",
       title: "着装要求",
-      subtitle: "“庄重与优雅 — 我们期待与您一同华丽出席。”",
+      subtitle: "Dress Code",
       ladies: {
-        title: "女士着装",
-        desc: "诚挚邀请您穿着优雅的拖地晚礼服，或精致迷人的中长款鸡尾酒礼裙。",
-        bullet1: "• 推荐穿着真丝、雪纺、绉纱等质地高雅的面料",
-        bullet2: "• 温暖温暖的夏日色系或马卡龙淡雅色系与场地相得益彰",
-        bullet3: "• 为免与新娘礼服相撞，请避免穿着全白、象牙白或米色",
+        label: "女士",
+        sublabel: "Ladies",
+        attire: "长裙",
+        note: "优雅、得体即可",
       },
       gentlemen: {
-        title: "男士着装",
-        desc: "诚挚邀请您穿着正式深色晚礼服，或经典量身定制的西装搭配挺括白衬衫。",
-        bullet1: "• 建议系上精致领带或领结，更显绅士儒雅",
-        bullet2: "• 推荐搭配正装皮鞋或优雅的乐福鞋",
-        bullet3: "• 经典色调如炭黑、藏青或纯黑色系最为合宜",
+        label: "男士",
+        sublabel: "Gentlemen",
+        attire: "衬衫",
+        note: "休闲或正式皆可",
       },
+      statement: "我们期待您以优雅得体的正装出席，与我们一同见证这个温馨而特别的时刻。",
+      colorNote: "颜色随意，但请避免白色礼服。",
+      illustrationAlt: "插画：两位女士身着长款礼服，两位男士身着衬衫搭配休闲西裤",
     },
     rsvp: {
       accept: "回覆邀请",

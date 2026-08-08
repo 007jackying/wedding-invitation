@@ -1,72 +1,26 @@
 import { motion } from "motion/react";
-import { Flower, Crown, LucideIcon } from "lucide-react";
+import { Heart } from "lucide-react";
 import { translations } from "../translations";
+import FloralFrame from "./FloralFrame";
 
 interface DressCodeSectionProps {
   lang: "en" | "cn";
 }
 
-interface DressRowProps {
-  photoUrl: string;
-  photoAlt: string;
-  photoCaption: string;
-  icon: LucideIcon;
-  title: string;
-  desc: string;
-  bullets: string[];
-  reverse?: boolean;
-}
-
-function DressRow({ photoUrl, photoAlt, photoCaption, icon: Icon, title, desc, bullets, reverse }: DressRowProps) {
+/** Label flanked by a hairline rule on each side, as on the card. */
+function RuledLabel({ label, sublabel }: { label: string; sublabel: string }) {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-12 gap-10 md:gap-14 items-center">
-      <motion.figure
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 1, ease: "easeOut" }}
-        className={`md:col-span-5 ${reverse ? "md:order-2" : ""}`}
-      >
-        <div className="overflow-hidden rounded-2xl aspect-[3/4] bg-brand-blush">
-          <img
-            src={photoUrl}
-            alt={photoAlt}
-            className="w-full h-full object-cover"
-            referrerPolicy="no-referrer"
-            loading="lazy"
-          />
-        </div>
-        <figcaption className="mt-3 font-serif italic text-sm text-brand-olive">
-          {photoCaption}
-        </figcaption>
-      </motion.figure>
-
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 1, delay: 0.15, ease: "easeOut" }}
-        className={`md:col-span-7 ${reverse ? "md:order-1" : ""}`}
-      >
-        <h3 className="flex items-center gap-3 font-serif italic font-light text-3xl sm:text-4xl text-brand-charcoal mb-5">
-          <Icon className="w-7 h-7 sm:w-8 sm:h-8 text-brand-rose shrink-0" strokeWidth={1.25} aria-hidden="true" />
-          {title}
-        </h3>
-        <p className="font-sans text-sm sm:text-base font-light text-brand-charcoal/90 leading-relaxed max-w-lg">
-          {desc}
-        </p>
-        <ul className="mt-8">
-          {bullets.map((bullet) => (
-            <li
-              key={bullet}
-              className="py-3.5 flex items-baseline gap-3 text-sm font-light text-brand-olive leading-relaxed"
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-brand-rose shrink-0 translate-y-[-2px]" />
-              <span>{bullet.replace(/^•\s*/, "")}</span>
-            </li>
-          ))}
-        </ul>
-      </motion.div>
+    <div className="text-center">
+      <div className="flex items-center justify-center gap-3">
+        <span className="h-px w-6 sm:w-10 bg-brand-gold/70" />
+        <span className="text-[11px] font-sans font-semibold tracking-[0.3em] uppercase text-brand-olive">
+          {label}
+        </span>
+        <span className="h-px w-6 sm:w-10 bg-brand-gold/70" />
+      </div>
+      <p className="mt-1.5 font-sans text-[11px] tracking-[0.2em] text-brand-olive">
+        {sublabel}
+      </p>
     </div>
   );
 }
@@ -75,50 +29,77 @@ export default function DressCodeSection({ lang }: DressCodeSectionProps) {
   const t = translations[lang].dressCode;
 
   return (
-    <section id="dress-code" className="relative w-full px-6 sm:px-10 py-24 sm:py-32 bg-brand-blush/40">
-      <div className="max-w-5xl mx-auto">
-        {/* Editorial section heading */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 1 }}
-          className="mb-16 sm:mb-20"
-        >
-          <span className="text-[11px] sm:text-xs tracking-[0.35em] text-brand-accent uppercase font-sans font-semibold">
-            {t.aesthetic}
-          </span>
-          <h2 className="font-serif italic font-light text-5xl sm:text-6xl text-brand-charcoal mt-4">
+    <section
+      id="dress-code"
+      className="relative w-full min-h-screen flex items-center px-gutter py-section bg-brand-blush/40"
+    >
+      <FloralFrame />
+
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 1, ease: "easeOut" }}
+        className="relative max-w-3xl mx-auto w-full"
+      >
+        {/* Heading */}
+        <div className="text-center">
+          <div className="flex items-center justify-center gap-3">
+            <span className="h-px w-10 sm:w-16 bg-brand-gold/70" />
+            <Heart className="w-3.5 h-3.5 text-brand-gold" strokeWidth={1.5} aria-hidden="true" />
+            <span className="h-px w-10 sm:w-16 bg-brand-gold/70" />
+          </div>
+          <h2 className="font-serif italic font-light whitespace-nowrap text-[clamp(1.75rem,8vw,3.75rem)] text-brand-charcoal mt-4">
             {t.title}
           </h2>
-          <p className="font-serif italic text-base sm:text-lg text-brand-olive mt-8 max-w-md leading-relaxed">
-            {t.subtitle}
-          </p>
-        </motion.div>
-
-        <div className="flex flex-col gap-20 sm:gap-28">
-          <DressRow
-            photoUrl="https://as1.ftcdn.net/v2/jpg/04/01/32/32/1000_F_401323209_6hckbR1E74vh66IhY6YLIduivHMd9306.jpg"
-            photoAlt="Bride dress inspiration"
-            photoCaption={lang === "cn" ? "灵感 — 象牙白与淡雅色系" : "Inspiration — elegance in ivory & pastels"}
-            icon={Flower}
-            title={t.ladies.title}
-            desc={t.ladies.desc}
-            bullets={[t.ladies.bullet1, t.ladies.bullet2, t.ladies.bullet3]}
-          />
-
-          <DressRow
-            photoUrl="https://images.unsplash.com/photo-1507679799987-c73779587ccf?q=80&w=1000&auto=format&fit=crop"
-            photoAlt="Groom suit inspiration"
-            photoCaption={lang === "cn" ? "灵感 — 经典礼服与定制西装" : "Inspiration — tuxedos & classic suits"}
-            icon={Crown}
-            title={t.gentlemen.title}
-            desc={t.gentlemen.desc}
-            bullets={[t.gentlemen.bullet1, t.gentlemen.bullet2, t.gentlemen.bullet3]}
-            reverse
-          />
+          <div className="flex items-center justify-center gap-4 mt-3">
+            <span className="h-px w-8 sm:w-14 bg-brand-gold/60" />
+            <p className="text-[11px] sm:text-xs tracking-[0.35em] text-brand-accent uppercase font-sans font-semibold whitespace-nowrap">
+              {t.subtitle}
+            </p>
+            <span className="h-px w-8 sm:w-14 bg-brand-gold/60" />
+          </div>
         </div>
-      </div>
+
+        {/* Ladies | Gentlemen, over the illustration the two halves belong to */}
+        <div className="mt-block grid grid-cols-2 gap-gutter">
+          <RuledLabel label={t.ladies.label} sublabel={t.ladies.sublabel} />
+          <RuledLabel label={t.gentlemen.label} sublabel={t.gentlemen.sublabel} />
+        </div>
+        <img
+          src="/dresscode/dress.webp"
+          alt={t.illustrationAlt}
+          className="mt-4 w-full"
+          loading="lazy"
+          width={2000}
+          height={955}
+        />
+
+        {/* Statement, held between two gold rules like the printed panel */}
+        <p className="mt-band border-x border-brand-gold/50 bg-brand-cream/50 px-gutter py-block text-center font-serif italic font-light text-base sm:text-lg leading-relaxed text-brand-charcoal">
+          {t.statement}
+        </p>
+
+        <div className="mt-band grid grid-cols-2 gap-gutter divide-x divide-brand-charcoal/15">
+          {([t.ladies, t.gentlemen] as const).map((side) => (
+            <div key={side.label} className="px-2 sm:px-6 text-center">
+              <p className="text-[11px] font-sans font-semibold tracking-[0.3em] uppercase text-brand-olive">
+                {side.label}
+              </p>
+              <p className="mt-2 font-serif text-2xl sm:text-3xl text-brand-charcoal">
+                {side.attire}
+              </p>
+              <p className="mt-1.5 font-sans text-xs sm:text-sm font-light text-brand-olive">
+                ({side.note})
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <p className="mt-band text-center font-serif italic font-light text-sm sm:text-base text-brand-accent">
+          {t.colorNote}
+        </p>
+      </motion.div>
     </section>
   );
 }
