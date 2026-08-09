@@ -51,6 +51,13 @@ export interface TranslationSchema {
       };
     };
   };
+  gallery: {
+    eyebrow: string;
+    title: string;
+    caption: string;
+    alt1: string;
+    alt2: string;
+  };
   dressCode: {
     title: string;
     subtitle: string;
@@ -149,6 +156,13 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
           wazeLink: "View on Waze →",
         },
       },
+    },
+    gallery: {
+      eyebrow: "Our Moments",
+      title: "Eva & Vincent",
+      caption: "A few of our favourite moments, on the way to this day.",
+      alt1: "Eva and Vincent standing close together, foreheads almost touching",
+      alt2: "Eva seated on a window ledge holding Vincent's hand, looking up at him",
     },
     dressCode: {
       title: "Dress Code",
@@ -259,6 +273,13 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
           wazeLink: "在 Waze 中查看 →",
         },
       },
+    },
+    gallery: {
+      eyebrow: "我们的时光",
+      title: "Eva & Vincent",
+      caption: "记录我们走到今天的点滴瞬间。",
+      alt1: "Eva 与 Vincent 相依而立，额头轻触",
+      alt2: "Eva 坐在窗台上握着 Vincent 的手，仰望着他",
     },
     dressCode: {
       title: "着装要求",

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Lock } from "lucide-react";
 import { track } from "@vercel/analytics";
 import HeroSection from "./components/HeroSection";
+import GallerySection from "./components/GallerySection";
 import DetailsSection from "./components/DetailsSection";
 import DressCodeSection from "./components/DressCodeSection";
 import RSVPModal from "./components/RSVPModal";
@@ -206,7 +207,10 @@ export default function App() {
           onAttendClick={handleOpenModal}
         />
 
-        {/* 2. Details & RSVP Section */}
+        {/* 2. Photos */}
+        <GallerySection lang={lang} />
+
+        {/* 3. Details & RSVP Section */}
         <DetailsSection
           onAttendClick={handleOpenModal}
           lang={lang}
@@ -214,7 +218,7 @@ export default function App() {
           canRSVP={invite !== null}
         />
 
-        {/* 3. Dress Code Section */}
+        {/* 4. Dress Code Section */}
         <DressCodeSection lang={lang} />
       </main>
 
