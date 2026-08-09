@@ -210,16 +210,16 @@ export default function App() {
         {/* 2. Photos */}
         <GallerySection lang={lang} />
 
-        {/* 3. Details & RSVP Section */}
+        {/* 3. Dress Code Section */}
+        <DressCodeSection lang={lang} />
+
+        {/* 4. Details & RSVP Section — last, so the page ends on the reply band */}
         <DetailsSection
           onAttendClick={handleOpenModal}
           lang={lang}
           myRSVP={myRSVP}
           canRSVP={invite !== null}
         />
-
-        {/* 4. Dress Code Section */}
-        <DressCodeSection lang={lang} />
       </main>
 
 

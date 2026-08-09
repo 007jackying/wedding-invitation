@@ -33,9 +33,9 @@ export default function GallerySection({ lang }: GallerySectionProps) {
             {t.eyebrow}
           </span>
           {/* ponytail: same clamp as the other section headings — one row from 320px up */}
-          <h2 className="font-serif italic font-light whitespace-nowrap text-[clamp(1.75rem,8vw,3.75rem)] text-brand-charcoal mt-4">
+          {/* <h2 className="font-serif italic font-light whitespace-nowrap text-[clamp(1.75rem,8vw,3.75rem)] text-brand-charcoal mt-4">
             {t.title}
-          </h2>
+          </h2> */}
           <div className="mt-4 mx-auto w-16 h-px bg-brand-gold/70" />
         </div>
 
