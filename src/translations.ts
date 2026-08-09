@@ -167,7 +167,7 @@ export const translations: Record<"en" | "cn", TranslationSchema> = {
       },
       statement:
         "We look forward to celebrating our special day with you in elegant and appropriate attire.",
-      colorNote: "Colors are welcome — please avoid white attire.",
+      colorNote: "Colors are welcome — please avoid white dress.",
       illustrationAlt:
         "Illustration of two guests in long evening dresses and two in shirts with smart casual trousers",
     },
