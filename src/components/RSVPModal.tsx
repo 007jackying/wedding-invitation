@@ -9,7 +9,10 @@ import { updateRSVP } from "../firebase";
 export default function RSVPModal({ isOpen, onClose, onSubmitSuccess, lang, code, invitedName }: RSVPModalProps) {
   const t = translations[lang].modal;
 
-  const [guestName, setGuestName] = useState(invitedName);
+  // The name is the couple's, not the guest's: it is what the invite was issued
+  // under and what the register is reconciled against, so the form shows it and
+  // does not let it be edited. Wrong name = WhatsApp the couple.
+  const guestName = invitedName;
   const [guestCount, setGuestCount] = useState<number | "">("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
@@ -172,16 +175,22 @@ export default function RSVPModal({ isOpen, onClose, onSubmitSuccess, lang, code
                   <User className="w-3.5 h-3.5 text-brand-rose" />
                   {t.fullName}
                 </label>
+                {/* readOnly, not disabled: a disabled field is skipped by the
+                    browser's own validation and reads as "broken" rather than
+                    "fixed". This one stays focusable and copyable. */}
                 <input
                   id="guest-name"
                   type="text"
-                  required
-                  disabled={isSubmitting}
+                  readOnly
                   value={guestName}
-                  onChange={(e) => setGuestName(e.target.value)}
-                  placeholder={lang === "cn" ? "例如：张伟" : "e.g. John Doe"}
-                  className="w-full px-4 py-3 bg-white border border-brand-rose/25 rounded-xl font-sans text-sm placeholder-brand-charcoal/30 text-brand-charcoal focus:outline-none focus:border-brand-rose focus:ring-2 focus:ring-brand-rose/15 transition-all disabled:opacity-50"
+                  aria-describedby="guest-name-note"
+                  className="w-full px-4 py-3 bg-brand-blush/40 border border-brand-rose/20 rounded-xl font-sans text-sm text-brand-charcoal cursor-default focus:outline-none focus:ring-2 focus:ring-brand-rose/15"
                 />
+                <p id="guest-name-note" className="mt-1.5 text-[11px] font-sans font-light text-brand-olive">
+                  {lang === "cn"
+                    ? "此姓名来自您的请柬。如需更改，请与我们联系。"
+                    : "This is the name on your invitation. Message us if it needs changing."}
+                </p>
               </div>
 
               {attending && (
