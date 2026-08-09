@@ -49,7 +49,7 @@ export default function HeroSection({ lang }: HeroSectionProps) {
 
   const scrollToNext = () => {
     track("Hero Scroll Clicked");
-    document.getElementById("details")?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById("gallery")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (

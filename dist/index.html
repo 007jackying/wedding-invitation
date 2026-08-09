@@ -12,9 +12,11 @@
 
     <!-- Link preview. This invitation is shared over WhatsApp, so the card is
          the first thing most guests see.
-         TODO once the domain is live: add <meta property="og:url"> with the
-         absolute URL, and swap og:image for a self-hosted photo of the couple —
-         link scrapers don't run JS, so both have to be static in this file. -->
+         TODO once the domain is live: add <meta property="og:url"> and make
+         og:image absolute. Facebook's and WhatsApp's scrapers resolve a
+         root-relative og:image against the page URL, but several smaller ones
+         don't, so the full https:// form is still the safe end state. Link
+         scrapers don't run JS, so all of this has to be static in this file. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Eva &amp; Vincent" />
     <meta property="og:title" content="Eva &amp; Vincent — 2 January 2027" />
@@ -22,16 +24,17 @@
       property="og:description"
       content="Join us at Chuai Heng Banquet Hall, Kuala Lumpur. RSVP by 1 November 2026."
     />
+    <meta property="og:image" content="/photos/first.jpeg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="2560" />
+    <meta property="og:image:height" content="1706" />
     <meta
-      property="og:image"
-      content="https://images.unsplash.com/photo-1519741497674-611481863552?q=80&amp;w=1200&amp;h=630&amp;fit=crop"
+      property="og:image:alt"
+      content="Eva and Vincent outdoors on their wedding day, Eva holding a small white cake"
     />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Wedding reception table setting at dusk" />
     <meta name="twitter:card" content="summary_large_image" />
-    <script type="module" crossorigin src="/assets/index-B9El5mA8.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-BuXcbts-.css">
+    <script type="module" crossorigin src="/assets/index-Fye_yU7C.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-CaOrNP61.css">
   </head>
   <body>
     <div id="root"></div>
