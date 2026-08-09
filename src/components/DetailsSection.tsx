@@ -59,7 +59,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-120px" }}
         transition={{ duration: 1, ease: "easeOut" }}
-        className="relative max-w-5xl mx-auto w-full"
+        className="relative max-w-5xl mx-auto w-full text-center"
       >
         {/* Editorial section heading */}
         <div className="mb-block">
@@ -70,92 +70,81 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
           <h2 className="font-serif italic font-light whitespace-nowrap text-[clamp(1.75rem,8vw,3.75rem)] text-brand-charcoal mt-4">
             {t.title}
           </h2>
+          <p className="font-serif text-xl sm:text-2xl text-brand-charcoal/90 mt-3">
+            {t.cards.when.dateVal}
+          </p>
         </div>
 
-        {/* Programma / Venue spread */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-band md:gap-0">
-          {/* Programma — the day as a sequence */}
-          <div className="md:pr-14 md:border-r md:border-brand-charcoal/15">
-            <h3 className="text-[11px] font-sans font-semibold tracking-[0.3em] uppercase text-brand-olive mb-2">
-              {t.cards.when.timelineLabel}
-            </h3>
-            <p className="font-serif text-2xl sm:text-3xl text-brand-charcoal mb-8">
-              {t.cards.when.dateVal}
-            </p>
+        {/* The evening as a sequence. This is the one place on the page where
+            order carries information the reader actually needs, so it gets the
+            full width instead of sharing a spread with the venue. */}
+        <ol className="relative flex items-start">
+          {/* The rail runs warm-to-dark across the evening: blush gold at the
+              6pm photos, cypress ink by the 10:30 farewell.
+              ponytail: top-[47px] = icon 28 + mb-4 16 + half the 6px dot.
+              Recompute it if the icon size or that margin changes. */}
+          <div
+            className="absolute top-[47px] h-px bg-gradient-to-r from-brand-gold via-brand-rose to-brand-charcoal/60"
+            style={{
+              left: `calc(50% / ${programmaRows.length})`,
+              right: `calc(50% / ${programmaRows.length})`,
+            }}
+          />
+          {programmaRows.map((row, i) => {
+            const Icon = TIMELINE_ICONS[i % TIMELINE_ICONS.length];
+            return (
+              <li key={row.id} className="flex-1 flex flex-col items-center text-center px-2">
+                <Icon className="w-7 h-7 text-brand-olive mb-4" strokeWidth={1.25} />
+                {/* relative so the dot paints over the absolutely-placed rail */}
+                <span className="relative w-1.5 h-1.5 rounded-full bg-brand-rose" />
+                <span className="mt-5 font-serif text-lg sm:text-xl text-brand-accent tabular-nums">
+                  {row.time}
+                </span>
+                <span className="mt-1.5 font-sans text-xs sm:text-sm font-light text-brand-charcoal/80 leading-snug">
+                  {row.text}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
 
-            <ol className="flex items-start">
-              {programmaRows.map((row, i) => {
-                const Icon = TIMELINE_ICONS[i % TIMELINE_ICONS.length];
-                return (
-                  <li key={row.id} className="flex-1 flex flex-col items-center text-center px-1">
-                    <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-brand-olive mb-4" strokeWidth={1.25} />
+        <div className="mt-block flex flex-col sm:flex-row items-center justify-center gap-4">
+          <CalendarButton lang={lang} />
+          <span className="text-xs font-light text-brand-olive leading-relaxed">
+            {lang === "cn" ? "将流程详情保存到您的个人日历" : "Save the day to your personal calendar"}
+          </span>
+        </div>
 
-                    <div className="w-full flex items-center">
-                      <div className={`flex-1 h-px ${i === 0 ? "opacity-0" : "bg-brand-charcoal/20"}`} />
-                      <div className="w-1.5 h-1.5 rounded-full bg-brand-rose shrink-0 mx-1" />
-                      <div
-                        className={`flex-1 h-px ${
-                          i === programmaRows.length - 1 ? "opacity-0" : "bg-brand-charcoal/20"
-                        }`}
-                      />
-                    </div>
+        {/* Venue — where the whole evening above happens */}
+        <div className="mt-band">
+          <p className="font-serif text-2xl sm:text-3xl text-brand-charcoal">
+            {t.cards.where.venueVal}
+          </p>
+          <p className="mt-3 font-sans text-sm sm:text-base font-light text-brand-charcoal/90 leading-relaxed">
+            20, Jalan Kampung, Imbi,<br />
+            55100 Kuala Lumpur,<br />
+            Wilayah Persekutuan Kuala Lumpur
+          </p>
 
-                    <span className="mt-5 font-serif text-base sm:text-lg text-brand-accent tabular-nums">
-                      {row.time}
-                    </span>
-                    <span className="mt-1 font-sans text-[11px] sm:text-xs font-light text-brand-charcoal/80 leading-snug">
-                      {row.text}
-                    </span>
-                  </li>
-                );
-              })}
-            </ol>
-
-            <div className="mt-8 flex flex-col sm:flex-row sm:items-center gap-4">
-              <CalendarButton lang={lang} />
-              <span className="text-xs font-light text-brand-olive leading-relaxed">
-                {lang === "cn" ? "将流程详情保存到您的个人日历" : "Save the day to your personal calendar"}
-              </span>
-            </div>
-          </div>
-
-          {/* Venue */}
-          <div className="md:pl-14">
-            <h3 className="text-[11px] font-sans font-semibold tracking-[0.3em] uppercase text-brand-olive mb-2">
-              {t.cards.where.venueLabel}
-            </h3>
-            <p className="font-serif text-2xl sm:text-3xl text-brand-charcoal mb-3">
-              {t.cards.where.venueVal}
-            </p>
-
-            <div>
-              <p className="font-sans text-sm sm:text-base font-light text-brand-charcoal/90 leading-relaxed">
-                20, Jalan Kampung, Imbi,<br />
-                55100 Kuala Lumpur,<br />
-                Wilayah Persekutuan Kuala Lumpur
-              </p>
-
-              <div className="mt-8 flex flex-col items-start gap-3">
-                <a
-                  href="https://maps.google.com/?q=Chuai+Heng+Banquet+Hall+Kuala+Lumpur"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => track("Directions Opened", { provider: "Google Maps" })}
-                  className="text-xs font-sans font-semibold tracking-[0.2em] text-brand-accent hover:text-brand-charcoal uppercase transition-colors border-b border-brand-rose/40 pb-1"
-                >
-                  {t.cards.where.mapLink}
-                </a>
-                <a
-                  href="waze://?h=w283fssu6&n=T&utm_source=waze_website&utm_medium=web-livemap-mobile-openapp-location&utm_campaign=default"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => track("Directions Opened", { provider: "Waze" })}
-                  className="text-xs font-sans font-semibold tracking-[0.2em] text-brand-accent hover:text-brand-charcoal uppercase transition-colors border-b border-brand-rose/40 pb-1"
-                >
-                  {t.cards.where.wazeLink}
-                </a>
-              </div>
-            </div>
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+            <a
+              href="https://maps.google.com/?q=Chuai+Heng+Banquet+Hall+Kuala+Lumpur"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track("Directions Opened", { provider: "Google Maps" })}
+              className="text-xs font-sans font-semibold tracking-[0.2em] text-brand-accent hover:text-brand-charcoal uppercase transition-colors border-b border-brand-rose/40 pb-1"
+            >
+              {t.cards.where.mapLink}
+            </a>
+            <a
+              href="waze://?h=w283fssu6&n=T&utm_source=waze_website&utm_medium=web-livemap-mobile-openapp-location&utm_campaign=default"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => track("Directions Opened", { provider: "Waze" })}
+              className="text-xs font-sans font-semibold tracking-[0.2em] text-brand-accent hover:text-brand-charcoal uppercase transition-colors border-b border-brand-rose/40 pb-1"
+            >
+              {t.cards.where.wazeLink}
+            </a>
           </div>
         </div>
 
@@ -168,7 +157,7 @@ export default function DetailsSection({ onAttendClick, lang, myRSVP, canRSVP }:
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 1 }}
-          className="mt-block max-w-2xl mx-auto bg-brand-charcoal text-brand-cream px-6 py-5 text-center rounded-2xl"
+          className="mt-band max-w-2xl mx-auto bg-brand-charcoal text-brand-cream px-6 py-5 text-center rounded-2xl"
         >
           <p className="font-serif italic font-light text-base sm:text-lg leading-snug">
             {t.byDate}
