@@ -63,12 +63,12 @@ export default function AudioPlayer({ lang }: AudioPlayerProps) {
     en: {
       play: "Unmute music",
       mute: "Mute music",
-      nowPlaying: "Playing Blue Hour by Taisei Iwasaki",
+      nowPlaying: "The Carpenters - Close To You",
     },
     cn: {
       play: "开启背景音乐",
       mute: "静音背景音乐",
-      nowPlaying: "正在播放 Blue Hour — 岩崎太整",
+      nowPlaying: "The Carpenters - Close To You",
     }
   }[lang];
 
